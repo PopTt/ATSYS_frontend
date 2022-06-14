@@ -1,25 +1,40 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { useActor } from '@xstate/react';
+import { makeStyles } from '@mui/styles';
+import { CssBaseline } from '@mui/material';
 
-function App() {
+import { AuthenticationService } from '../machines/AuthenticationMachine';
+import AuthenticatedRoutesContainer from '../routes/containers/AuthenticatedRoutesContainer';
+import UnauthorizedRoutesContainer from '../routes/containers/UnauthorizedRoutesContainer';
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: 'flex',
+    fontFamily: 'Quicksand',
+    backgroundColor: theme.palette.background.default,
+  },
+}));
+
+const App = () => {
+  const classes = useStyles();
+  const [authState] = useActor(AuthenticationService);
+
+  const isLogin = authState.matches('authorized');
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className={classes.root}>
+      <CssBaseline />
+      {/* {isLogin ? (
+        <AuthenticatedRoutesContainer
+          isLogin={isLogin}
+          authService={AuthenticationService}
+        />
+      ) : (
+        <UnauthorizedRoutesContainer authService={AuthenticationService} />
+      )} */}
+      <UnauthorizedRoutesContainer authService={AuthenticationService} />
     </div>
   );
-}
+};
 
 export default App;
