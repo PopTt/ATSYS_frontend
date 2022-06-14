@@ -1,44 +1,89 @@
 import React, { useEffect, useState } from 'react';
-import { Formik, Form, Field, FieldProps } from 'formik';
+import { makeStyles } from '@mui/styles';
+import { Formik, Form, Field } from 'formik';
 import { useActor } from '@xstate/react';
 import { Link } from 'react-router-dom';
-import {
-  CssBaseline,
-  Alert,
-  Grid,
-  Divider,
-  Typography,
-  Container,
-} from '@mui/material';
-import _ from 'lodash';
+import { Alert, Grid, Divider } from '@mui/material';
+import { string, object, ref } from 'yup';
 
-import { authorized, unauthorized } from '../../machines/AuthenticationMachine';
-import { CircularLoading } from '../LoadingComponents';
-import { Google } from './SocialMedia';
-import { home } from '../../links/url';
-import { useGlobalStyles } from '../../helpers/Styles';
-import { TextFieldBox, ButtonDefault } from '../../framework/Form';
-import { GetFirstObjectKey } from '../../helpers/Converter';
-import {
-  useStyles,
-  Props,
-  validationSignUpSchema,
-} from './AuthenticationConfig';
-import { User, CreateUser } from '../../models';
-import { signIn } from '../../links/url';
-import Wave from '../../static/svg/Wave.svg';
+import { Google } from './Google.js';
+import { login } from '../../links/url.js';
+import { useGlobalStyles } from '../../helpers/styles.js';
+import { MediumTitle } from '../../frameworks/Title.js';
+import { ContainedButton, TextBox } from '../../frameworks/Form.js';
 
 const DuplicateEmail = 'Your email has already been registered.';
 
-export const SignUp: React.FC<Props> = ({ authService }) => {
+export const validationSignUpSchema = object({
+  email: string().required('Email is required'),
+  password: string()
+    .required('Password is required')
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/,
+      'Your password must contain at least 8 characters with at least one Uppercase, one Lowercase, one Number and one Symbol.'
+    ),
+  passwordConfirm: string()
+    .oneOf([ref('password'), null], 'Passwords must match')
+    .required('Confirm Password is required'),
+  firstName: string().required('First Name is required'),
+  lastName: string().required('Last Name is required'),
+});
+
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '500px',
+  },
+  form: {
+    padding: '12px 48px',
+    width: '100%',
+    minHeight: '600px',
+    backgroundColor: 'white',
+    boxShadow: theme.shadows[0],
+    borderRadius: '12px',
+    '& .MuiFormHelperText-root': {
+      display: 'block',
+      marginTop: '0px',
+      marginBottom: '0px',
+    },
+    '& > *': { margin: '24px 0' },
+  },
+  header: {
+    marginTop: '48px',
+    textAlign: 'center',
+  },
+  icon: {
+    marginRight: '12px',
+  },
+  link: {
+    textDecoration: 'None',
+    color: 'black',
+    '&:hover': {
+      color: 'blue',
+    },
+  },
+  flexFieldBox: {
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    '& > *': {
+      flex: '1 0',
+      marginRight: '5px',
+    },
+    '&:last-child': {
+      marginRight: '-5px',
+    },
+  },
+}));
+
+export const Register = ({}) => {
   const classes = useStyles();
   const global = useGlobalStyles();
 
-  const [error, setError] = useState('');
-
-  const [state, send] = useActor(authService);
-
-  const initialValues: CreateUser | { passwordConfirm: string } = {
+  const initialValues = {
     email: '',
     password: '',
     firstName: '',
@@ -46,179 +91,115 @@ export const SignUp: React.FC<Props> = ({ authService }) => {
     passwordConfirm: '',
   };
 
-  const sendAuthorized = () => send({ type: authorized });
-  const sendUnauthorized = () => send({ type: unauthorized });
-  const signUp = (user: CreateUser | { passwordConfirm: string }) => {
-    send({ type: 'SIGNUP', value: user });
-  };
-  const googleSignUp = (user: User) => send({ type: 'SIGNIN', value: user });
-
-  useEffect(() => {
-    //@ts-ignore
-    if (state.value['failure'] !== undefined) {
-      setError(state.meta[GetFirstObjectKey(state.meta)]?.message);
-      sendUnauthorized();
-    } else {
-      switch (state.value) {
-        case 'redirect':
-          if (state.context.user === undefined || state.context.user === null) {
-            setError(DuplicateEmail);
-            sendUnauthorized();
-          } else {
-            window.location.replace(home);
-            sendAuthorized();
-          }
-          break;
-      }
-    }
-  }, [state.value]);
-
   return (
-    <>
-      <img src={Wave} alt='wave' width='100%' height='100%' />
-      <Container component='main' maxWidth='xs'>
-        <CssBaseline />
-        <div className={classes.paper} style={{ width: '650px' }}>
-          {state.matches(unauthorized) && (
-            <Formik
-              initialValues={initialValues}
-              validationSchema={validationSignUpSchema}
-              onSubmit={async (values, { setSubmitting }) => {
-                setSubmitting(true);
-                signUp(values);
-              }}
-            >
-              {({ setFieldValue, isValid, isSubmitting }) => (
-                <Form className={classes.form}>
-                  <div className={classes.header}>
-                    <Typography component='h1' variant='h4' fontWeight={500}>
-                      Sign Up
-                    </Typography>
-                    <Typography component='p' variant='subtitle1'>
-                      Help us to get know about you.
-                    </Typography>
-                  </div>
-                  {error !== null && error !== '' && (
-                    <Alert severity='error'>{error}</Alert>
-                  )}
-                  <div className={classes.flexInput}>
-                    <div>
-                      <Field name='firstName'>
-                        {({
-                          field,
-                          meta: { touched, error, value, initialValue },
-                        }: FieldProps) => (
-                          <TextFieldBox
-                            label='First Name'
-                            field={field}
-                            touched={touched}
-                            value={value}
-                            initialValue={initialValue}
-                            error={error}
-                          />
-                        )}
-                      </Field>
-                    </div>
-                    <div style={{ marginLeft: '10px' }}>
-                      <Field name='lastName'>
-                        {({
-                          field,
-                          meta: { touched, error, value, initialValue },
-                        }: FieldProps) => (
-                          <TextFieldBox
-                            label='Last Name'
-                            field={field}
-                            touched={touched}
-                            value={value}
-                            initialValue={initialValue}
-                            error={error}
-                          />
-                        )}
-                      </Field>
-                    </div>
-                  </div>
-                  <div className={classes.flexInput}>
-                    <div>
-                      <Field name='email'>
-                        {({
-                          field,
-                          meta: { touched, error, value, initialValue },
-                        }: FieldProps) => (
-                          <TextFieldBox
-                            label='Email'
-                            type='email'
-                            field={field}
-                            touched={touched}
-                            value={value}
-                            initialValue={initialValue}
-                            error={error}
-                          />
-                        )}
-                      </Field>
-                    </div>
-                  </div>
-                  <div>
-                    <Field name='password'>
-                      {({
-                        field,
-                        meta: { touched, error, value, initialValue },
-                      }: FieldProps) => (
-                        <TextFieldBox
-                          label='Password'
-                          type='password'
-                          field={field}
-                          touched={touched}
-                          value={value}
-                          initialValue={initialValue}
-                          error={error}
-                        />
-                      )}
-                    </Field>
-                  </div>
-                  <div>
-                    <Field name='passwordConfirm'>
-                      {({
-                        field,
-                        meta: { touched, error, value, initialValue },
-                      }: FieldProps) => (
-                        <TextFieldBox
-                          label='Confirm Password'
-                          type='password'
-                          field={field}
-                          touched={touched}
-                          value={value}
-                          initialValue={initialValue}
-                          error={error}
-                        />
-                      )}
-                    </Field>
-                  </div>
-                  <ButtonDefault
-                    text='Sign Up'
-                    buttonClass={classes.submit}
-                    isValid={true}
-                    isSubmitting={isSubmitting}
-                  />
-                  <Divider flexItem>OR</Divider>
-                  <Google send={googleSignUp} />
-                  <Grid container justifyContent='center'>
-                    <Grid item>
-                      <Link to={signIn} className={classes.link}>
-                        {'One of us? Sign in now!'}
-                      </Link>
-                    </Grid>
-                  </Grid>
-                </Form>
-              )}
-            </Formik>
-          )}
-          {(state.matches('signup') || state.matches('redirect')) && (
-            <div className={classes.form}>
-              <CircularLoading />
+    <div className={classes.paper} style={{ width: '650px' }}>
+      <Formik
+        initialValues={initialValues}
+        validationSchema={validationSignUpSchema}
+        onSubmit={async (values, { setSubmitting }) => {
+          setSubmitting(true);
+        }}
+      >
+        {({ setFieldValue, isValid, isSubmitting }) => (
+          <Form className={classes.form}>
+            <div className={classes.header}>
+              <MediumTitle title='Register' />
             </div>
-          )}
-        </div>
-      </Container>
-    </>
+            <Field name='email'>
+              {({ field, meta: { touched, error, value, initialValue } }) => (
+                <TextBox
+                  label='Email'
+                  type='email'
+                  iconClass={classes.icon}
+                  field={field}
+                  touched={touched}
+                  value={value}
+                  initialValue={initialValue}
+                  error={error}
+                />
+              )}
+            </Field>
+            <div className={classes.flexFieldBox}>
+              <div>
+                <Field name='firstName'>
+                  {({
+                    field,
+                    meta: { touched, error, value, initialValue },
+                  }) => (
+                    <TextBox
+                      label='First Name'
+                      field={field}
+                      touched={touched}
+                      value={value}
+                      initialValue={initialValue}
+                      error={error}
+                    />
+                  )}
+                </Field>
+              </div>
+              <div style={{ marginLeft: '10px' }}>
+                <Field name='lastName'>
+                  {({
+                    field,
+                    meta: { touched, error, value, initialValue },
+                  }) => (
+                    <TextBox
+                      label='Last Name'
+                      field={field}
+                      touched={touched}
+                      value={value}
+                      initialValue={initialValue}
+                      error={error}
+                    />
+                  )}
+                </Field>
+              </div>
+            </div>
+            <Field name='password'>
+              {({ field, meta: { touched, error, value, initialValue } }) => (
+                <TextBox
+                  label='Password'
+                  type='password'
+                  field={field}
+                  touched={touched}
+                  value={value}
+                  initialValue={initialValue}
+                  error={error}
+                />
+              )}
+            </Field>
+            <Field name='passwordConfirm'>
+              {({ field, meta: { touched, error, value, initialValue } }) => (
+                <TextBox
+                  label='Confirm Password'
+                  type='password'
+                  field={field}
+                  touched={touched}
+                  value={value}
+                  initialValue={initialValue}
+                  error={error}
+                />
+              )}
+            </Field>
+            <div style={{ marginTop: '32px', marginBottom: '32px' }}>
+              <ContainedButton
+                text='Register'
+                onClick={() => console.log('hello')}
+                fullWidth
+              />
+            </div>
+            <Divider flexItem>OR</Divider>
+            <Google send={() => console.log('hello')} />
+            <Grid container justifyContent='center'>
+              <Grid item>
+                <Link to={login} className={classes.link}>
+                  Have an account? Login here!
+                </Link>
+              </Grid>
+            </Grid>
+          </Form>
+        )}
+      </Formik>
+    </div>
   );
 };

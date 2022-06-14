@@ -18,17 +18,20 @@ const theme = createTheme({
   },
   palette: {
     primary: {
-      main: '#163057',
+      main: '#654321',
     },
     secondary: {
       main: '#fff',
     },
     background: {
-      default: '#f8f8ff',
+      default: 'rgba(250, 224, 216, 0.2)',
     },
   },
   typography: {
-    fontFamily: ['Quicksand', 'sans serif'].join(','),
+    fontFamily: ['Open Sans', 'sans serif'].join(','),
+  },
+  shadows: {
+    0: 'rgba(50, 50, 93, 0.25) 0px 13px 27px -5px, rgba(0, 0, 0, 0.3) 0px 8px 16px -8px',
   },
 });
 

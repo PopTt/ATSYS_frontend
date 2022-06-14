@@ -2,15 +2,11 @@ import React from 'react';
 import { Grid } from '@mui/material';
 import GoogleLogin from 'react-google-login';
 
-import { IconBox } from '../../framework/Icon';
+import { IconBox } from '../../frameworks/Icon.js';
 import GoogleIcon from '../../static/img/Google.png';
 
-interface Props {
-  send: Function;
-}
-
-export const Google: React.FC<Props> = ({ send }: Props) => {
-  const responseGoogle = (response: any) => {
+export const Google = ({ send }) => {
+  const responseGoogle = (response) => {
     const user = {
       googleId: response['profileObj'].googleId,
       email: response['profileObj'].email,
@@ -24,7 +20,7 @@ export const Google: React.FC<Props> = ({ send }: Props) => {
   return (
     <Grid container justifyContent='center' style={{ textAlign: 'center' }}>
       <GoogleLogin
-        clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID!}
+        clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}
         render={(renderProps) => (
           <IconBox
             source={GoogleIcon}

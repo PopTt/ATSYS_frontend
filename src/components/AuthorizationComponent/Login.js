@@ -10,12 +10,15 @@ import {
   Checkbox,
 } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
-import { string, object, ref } from 'yup';
+import { string, object } from 'yup';
 import EmailIcon from '@mui/icons-material/Email';
-import LockIcon from '@mui/icons-material/Lock';
+import PasswordIcon from '@mui/icons-material/Lock';
 
+import { Google } from './Google.js';
 import { register } from '../../links/url.js';
 import { useGlobalStyles } from '../../helpers/styles.js';
+import { ContainedButton, TextBox } from '../../frameworks/Form.js';
+import { MediumTitle } from '../../frameworks/Title.js';
 
 require('dotenv').config();
 
@@ -29,57 +32,35 @@ const useStyles = makeStyles((theme) => ({
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: '550px',
-    [theme.breakpoints.down('sm')]: {
-      width: '350px',
-    },
+    width: '500px',
   },
   form: {
     padding: '12px 48px',
     width: '100%',
-    minHeight: '480px',
-    border: '1px solid black',
+    minHeight: '600px',
     backgroundColor: 'white',
+    boxShadow: theme.shadows[0],
+    borderRadius: '12px',
     '& .MuiFormHelperText-root': {
       display: 'block',
       marginTop: '0px',
       marginBottom: '0px',
     },
-    '& > *': { margin: '8px 0' },
-    [theme.breakpoints.down('sm')]: {
-      padding: '30px',
-      '& > *': {
-        margin: '0',
-      },
-    },
+    '& > *': { margin: '24px 0' },
   },
   header: {
-    marginTop: theme.spacing(2),
+    marginTop: '48px',
     textAlign: 'center',
   },
   icon: {
-    marginRight: '5px',
-    fontSize: '36px',
-  },
-  flexInput: {
-    display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    '& > *': {
-      flex: '1 0',
-      marginRight: '5px',
-    },
-    '&:last-child': {
-      marginRight: '-5px',
-    },
-  },
-  submit: {
-    marginTop: theme.spacing(4),
-    marginBottom: theme.spacing(3),
+    marginRight: '12px',
   },
   link: {
     textDecoration: 'None',
     color: 'black',
+    '&:hover': {
+      color: 'blue',
+    },
   },
 }));
 
@@ -110,21 +91,57 @@ export const Login = ({}) => {
       >
         {({ isValid, isSubmitting }) => (
           <Form className={classes.form}>
-            <div className={classes.header} style={{ marginBottom: '24px' }}>
-              <Typography component='h1' variant='h4' fontWeight={500}>
-                Sign In
-              </Typography>
+            <div className={classes.header} style={{ marginBottom: '48px' }}>
+              <MediumTitle title='Login' />
             </div>
+            <Field name='email'>
+              {({ field, meta: { touched, error, value, initialValue } }) => (
+                <TextBox
+                  label='Email'
+                  type='email'
+                  Icon={EmailIcon}
+                  iconClass={classes.icon}
+                  field={field}
+                  touched={touched}
+                  value={value}
+                  initialValue={initialValue}
+                  error={error}
+                />
+              )}
+            </Field>
+            <Field name='password'>
+              {({ field, meta: { touched, error, value, initialValue } }) => (
+                <TextBox
+                  label='Password'
+                  type='password'
+                  Icon={PasswordIcon}
+                  iconClass={classes.icon}
+                  field={field}
+                  touched={touched}
+                  value={value}
+                  initialValue={initialValue}
+                  error={error}
+                />
+              )}
+            </Field>
             <div className={global.sameLine} style={{ marginBottom: '-20px' }}>
               <Grid item justifyContent='left'>
                 <FormControlLabel control={<Checkbox />} label='Remember Me' />
               </Grid>
             </div>
+            <div style={{ marginTop: '32px', marginBottom: '32px' }}>
+              <ContainedButton
+                text='Login'
+                onClick={() => console.log('hello')}
+                fullWidth
+              />
+            </div>
             <Divider flexItem>OR</Divider>
+            <Google send={() => console.log('sign in')} />
             <Grid container justifyContent='center'>
               <Grid item>
                 <Link to={register} className={classes.link}>
-                  New to URoom? Join Now!
+                  Need an account? Register here!
                 </Link>
               </Grid>
             </Grid>

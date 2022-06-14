@@ -10,7 +10,7 @@ import UnauthorizedRoutesContainer from '../routes/containers/UnauthorizedRoutes
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
-    fontFamily: 'Quicksand',
+    fontFamily: 'Open Sans',
     backgroundColor: theme.palette.background.default,
   },
 }));
