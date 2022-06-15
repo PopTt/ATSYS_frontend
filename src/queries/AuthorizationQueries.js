@@ -1,53 +1,41 @@
 import {
-  APIPort,
-  user_login,
-  user_register,
-  user_google_login,
-  user_log_out,
-} from '../links/api.js';
+  backend,
+  login as login_path,
+  register as register_path,
+  log_out as logout_path,
+} from './api_path.js';
 import { httpClient } from './axios/http.js';
 
-export const login = async (user) => {
-  let url = APIPort + user_login;
-  if (user.ref) url = APIPort + user_google_login;
+require('dotenv').config();
+const ACCESS_TOKEN = process.env.REACT_APP_ACCESS_TOKEN;
 
+export const login = async (user) => {
   return await httpClient
-    .post(
-      url,
-      {
-        data: user,
-      },
-      {
-        withCredentials: true,
-      }
-    )
+    .post(backend + login_path, user, {
+      withCredentials: true,
+    })
     .then((res) => {
-      return JSON.parse(res.data.user);
+      localStorage.setItem(ACCESS_TOKEN, res.token);
+      return res.data;
     })
     .catch((err) => {
-      throw new Error(err);
+      throw new Error(err.response.data.message);
     });
 };
 
 export const register = async (user) => {
   return await httpClient
-    .post(
-      APIPort + user_register,
-      {
-        data: user,
-      },
-      {
-        withCredentials: true,
-      }
-    )
-    .then((res) => {
-      return JSON.parse(res.data.user);
+    .post(backend + register_path, user, {
+      withCredentials: true,
+    })
+    .then(() => {
+      return true;
     })
     .catch((err) => {
-      throw new Error(err);
+      throw new Error(err.response.data.message);
     });
 };
 
 export const logout = async () => {
-  await httpClient.post(APIPort + user_log_out);
+  await httpClient.post(backend + logout_path);
 };

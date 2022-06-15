@@ -1,5 +1,5 @@
 import { httpClient } from './http.js';
-import { ErrorHandler } from '../helpers/errorHandler.js';
+import { ErrorCode } from './errorCode.js';
 
 /*
 Props {
@@ -8,49 +8,41 @@ Props {
 }
 */
 
-const axiosConfig = {};
+require('dotenv').config();
+const ACCESS_TOKEN = process.env.REACT_APP_ACCESS_TOKEN;
 
-export const AxiosPost = async (props) => {
+const config = {
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+  },
+};
+
+export const Post = async (props) => {
   return await httpClient
     .post(
       props.url,
       {
         data: props.event,
       },
-      axiosConfig
+      config
     )
     .then((res) => {
       return res;
     })
     .catch((err) => {
-      ErrorHandler(err.response.status);
+      ErrorCode(err.response.status);
     });
 };
 
-export const AxiosDelete = async (props) => {
+export const Get = async (props) => {
   return await httpClient
-    .delete(props.url, {
-      data: props.event,
-    })
-    .then((res) => {
-      if (res.status === 201) {
-        return res.data;
-      }
-    })
-    .catch((err) => {
-      ErrorHandler(err.response.status);
-    });
-};
-
-export const AxiosGetByUrlId = async (props) => {
-  return await httpClient
-    .get(props.url, axiosConfig)
+    .get(props.url, config)
     .then((res) => {
       if (res.status === 200) {
         return res.data;
       }
     })
     .catch((err) => {
-      ErrorHandler(err.response.status);
+      ErrorCode(err.response.status);
     });
 };

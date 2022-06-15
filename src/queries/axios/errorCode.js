@@ -15,7 +15,7 @@ export const ExSE02 = 'Internal Server Error';
 
 export const ExG01 = 'Bad Request';
 
-export const ErrorHandler = (status) => {
+export const ErrorCode = (status) => {
   switch (status) {
     case 400:
       throw ExG01;
