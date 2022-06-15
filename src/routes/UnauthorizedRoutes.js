@@ -6,16 +6,16 @@ import {
   Redirect,
 } from 'react-router-dom';
 
-import { Login } from '../../components/AuthorizationComponent/Login.js';
-import { Register } from '../../components/AuthorizationComponent/Register.js';
-import { login, register } from '../../links/url.js';
+import { Login } from '../components/AuthorizationComponent/Login.js';
+import { Register } from '../components/AuthorizationComponent/Register.js';
+import { login, register } from '../routes/route_paths.js';
 
-const UnauthorizedRoutesContainer = ({ authService }) => {
+const UnauthorizedRoutes = ({ authService }) => {
   return (
     <Router>
       <Switch>
         <Route exact path={login}>
-          <Login />
+          <Login authService={authService} />
         </Route>
         <Route exact path={register}>
           <Register authService={authService} />
@@ -26,4 +26,4 @@ const UnauthorizedRoutesContainer = ({ authService }) => {
   );
 };
 
-export default UnauthorizedRoutesContainer;
+export default UnauthorizedRoutes;

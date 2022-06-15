@@ -1,25 +1,20 @@
 import React from 'react';
-import { Route, Redirect } from 'react-router-dom';
+import { Switch } from 'react-router';
 
-import { login } from '../links/url.js';
+import * as Path from './route_paths.js';
+import { Home } from '../containers/AtHome.js';
+import AuthorizedRoute from './AuthorizedRoute.js';
 
-function AuthenticatedRoutes({ isLogin, children, ...rest }) {
+require('dotenv').config();
+
+const AuthorizedRoutes = ({ isLogin, authService }) => {
   return (
-    <Route
-      {...rest}
-      render={() =>
-        isLogin ? (
-          children
-        ) : (
-          <Redirect
-            to={{
-              pathname: login,
-            }}
-          />
-        )
-      }
-    />
+    <Switch>
+      <AuthorizedRoute isLogin={isLogin} exact path={[Path.home, '', '/']}>
+        <Home authService={authService} />
+      </AuthorizedRoute>
+    </Switch>
   );
-}
+};
 
-export default AuthenticatedRoutes;
+export default AuthorizedRoutes;
