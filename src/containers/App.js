@@ -3,36 +3,34 @@ import { useActor } from '@xstate/react';
 import { makeStyles } from '@mui/styles';
 import { CssBaseline } from '@mui/material';
 
-import { AuthenticationService } from '../machines/AuthenticationMachine';
-import AuthenticatedRoutesContainer from '../routes/containers/AuthenticatedRoutesContainer';
-import UnauthorizedRoutesContainer from '../routes/containers/UnauthorizedRoutesContainer';
+import { AuthorizationService } from '../machines/UserAuthorizationMachine.js';
+import AuthorizedRoutes from '../routes/AuthorizedRoutes.js';
+import UnauthorizedRoutes from '../routes/UnauthorizedRoutes.js';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
     fontFamily: 'Open Sans',
-    backgroundColor: theme.palette.background.default,
   },
 }));
 
 const App = () => {
   const classes = useStyles();
-  const [authState] = useActor(AuthenticationService);
+  const [state] = useActor(AuthorizationService);
 
-  const isLogin = authState.matches('authorized');
+  const isLogin = state.matches('authorized');
 
   return (
     <div className={classes.root}>
       <CssBaseline />
-      {/* {isLogin ? (
-        <AuthenticatedRoutesContainer
+      {isLogin ? (
+        <AuthorizedRoutes
           isLogin={isLogin}
-          authService={AuthenticationService}
+          authService={AuthorizationService}
         />
       ) : (
-        <UnauthorizedRoutesContainer authService={AuthenticationService} />
-      )} */}
-      <UnauthorizedRoutesContainer authService={AuthenticationService} />
+        <UnauthorizedRoutes authService={AuthorizationService} />
+      )}
     </div>
   );
 };

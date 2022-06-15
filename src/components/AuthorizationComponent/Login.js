@@ -1,30 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { makeStyles } from '@mui/styles';
+import { useActor } from '@xstate/react';
 import { Link } from 'react-router-dom';
-import {
-  Grid,
-  Typography,
-  Alert,
-  Divider,
-  FormControlLabel,
-  Checkbox,
-} from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
+import { Grid, Alert } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
 import { string, object } from 'yup';
 import EmailIcon from '@mui/icons-material/Email';
 import PasswordIcon from '@mui/icons-material/Lock';
 
-import { Google } from './Google.js';
-import { register } from '../../links/url.js';
-import { useGlobalStyles } from '../../helpers/styles.js';
-import { ContainedButton, TextBox } from '../../frameworks/Form.js';
+import { home, register } from '../../routes/route_paths.js';
+import { TextBox } from '../../frameworks/Form.js';
 import { MediumTitle } from '../../frameworks/Title.js';
-
-require('dotenv').config();
-
-var logoutMessage = 'You have logged out successfully.';
-var incorrectInfo = 'Your email or password is incorrect.';
-var tokenExpireMessage = 'Your session is expired. Please login again.';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -37,9 +24,9 @@ const useStyles = makeStyles((theme) => ({
   form: {
     padding: '12px 48px',
     width: '100%',
-    minHeight: '600px',
+    minHeight: '500px',
     backgroundColor: 'white',
-    boxShadow: theme.shadows[0],
+    boxShadow: theme.shadows[25],
     borderRadius: '12px',
     '& .MuiFormHelperText-root': {
       display: 'block',
@@ -64,21 +51,32 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const validationSignInSchema = object({
+const initialValues = {
+  email: '',
+  password: '',
+};
+
+const validationSignInSchema = object({
   email: string().required('Email is required'),
   password: string()
     .min(6, 'Password must be at least 6 characters')
     .required('Password is required'),
 });
 
-export const Login = ({}) => {
+export const Login = ({ authService }) => {
   const classes = useStyles();
-  const global = useGlobalStyles();
 
-  const initialValues = {
-    email: '',
-    password: '',
-  };
+  const [state, send] = useActor(authService);
+
+  useEffect(() => {
+    send({ type: 'UNAUTHORIZED' });
+  }, []);
+
+  useEffect(() => {
+    if (state.matches('authorized')) {
+      window.location.replace(home);
+    }
+  }, [state]);
 
   return (
     <div className={classes.paper} style={{ padding: '32px' }}>
@@ -87,6 +85,7 @@ export const Login = ({}) => {
         validationSchema={validationSignInSchema}
         onSubmit={async (values, { setSubmitting }) => {
           setSubmitting(true);
+          send({ type: 'LOGIN', value: values });
         }}
       >
         {({ isValid, isSubmitting }) => (
@@ -94,6 +93,9 @@ export const Login = ({}) => {
             <div className={classes.header} style={{ marginBottom: '48px' }}>
               <MediumTitle title='Login' />
             </div>
+            {state.matches('failure') && (
+              <Alert severity='error'>{state.context.error}</Alert>
+            )}
             <Field name='email'>
               {({ field, meta: { touched, error, value, initialValue } }) => (
                 <TextBox
@@ -124,20 +126,16 @@ export const Login = ({}) => {
                 />
               )}
             </Field>
-            <div className={global.sameLine} style={{ marginBottom: '-20px' }}>
-              <Grid item justifyContent='left'>
-                <FormControlLabel control={<Checkbox />} label='Remember Me' />
-              </Grid>
-            </div>
-            <div style={{ marginTop: '32px', marginBottom: '32px' }}>
-              <ContainedButton
-                text='Login'
-                onClick={() => console.log('hello')}
+            <div style={{ marginTop: '64px', marginBottom: '32px' }}>
+              <LoadingButton
+                type='submit'
+                loading={state.matches('login')}
+                variant='contained'
                 fullWidth
-              />
+              >
+                Login
+              </LoadingButton>
             </div>
-            <Divider flexItem>OR</Divider>
-            <Google send={() => console.log('sign in')} />
             <Grid container justifyContent='center'>
               <Grid item>
                 <Link to={register} className={classes.link}>

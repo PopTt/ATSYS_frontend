@@ -6,4 +6,7 @@ export const useGlobalStyles = makeStyles((theme) => ({
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
+  stayRight: {
+    marginLeft: 'auto',
+  },
 }));

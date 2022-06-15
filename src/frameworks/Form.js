@@ -61,9 +61,21 @@ export const TextBox = ({
   );
 };
 
-export const ContainedButton = ({ text, onClick, fullWidth }) => {
+export const ContainedButton = ({
+  text,
+  type = 'button',
+  onClick,
+  fullWidth,
+}) => {
   return (
-    <Button variant='contained' onClick={() => onClick()} fullWidth={fullWidth}>
+    <Button
+      variant='contained'
+      type={type}
+      onClick={() => {
+        if (onClick) onClick();
+      }}
+      fullWidth={fullWidth}
+    >
       {text}
     </Button>
   );

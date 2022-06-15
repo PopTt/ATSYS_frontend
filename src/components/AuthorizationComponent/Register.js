@@ -1,20 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { makeStyles } from '@mui/styles';
 import { Formik, Form, Field } from 'formik';
 import { useActor } from '@xstate/react';
 import { Link } from 'react-router-dom';
-import { Alert, Grid, Divider } from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
+import { Alert, Grid } from '@mui/material';
 import { string, object, ref } from 'yup';
 
-import { Google } from './Google.js';
-import { login } from '../../links/url.js';
-import { useGlobalStyles } from '../../helpers/styles.js';
+import { login } from '../../routes/route_paths.js';
 import { MediumTitle } from '../../frameworks/Title.js';
-import { ContainedButton, TextBox } from '../../frameworks/Form.js';
+import { TextBox } from '../../frameworks/Form.js';
 
-const DuplicateEmail = 'Your email has already been registered.';
+const initialValues = {
+  email: '',
+  password: '',
+  first_name: '',
+  last_name: '',
+  passwordConfirm: '',
+};
 
-export const validationSignUpSchema = object({
+const validationSignUpSchema = object({
   email: string().required('Email is required'),
   password: string()
     .required('Password is required')
@@ -22,11 +27,11 @@ export const validationSignUpSchema = object({
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/,
       'Your password must contain at least 8 characters with at least one Uppercase, one Lowercase, one Number and one Symbol.'
     ),
-  passwordConfirm: string()
+  password_confirm: string()
     .oneOf([ref('password'), null], 'Passwords must match')
     .required('Confirm Password is required'),
-  firstName: string().required('First Name is required'),
-  lastName: string().required('Last Name is required'),
+  first_name: string().required('First Name is required'),
+  last_name: string().required('Last Name is required'),
 });
 
 const useStyles = makeStyles((theme) => ({
@@ -40,9 +45,9 @@ const useStyles = makeStyles((theme) => ({
   form: {
     padding: '12px 48px',
     width: '100%',
-    minHeight: '600px',
+    minHeight: '500px',
     backgroundColor: 'white',
-    boxShadow: theme.shadows[0],
+    boxShadow: theme.shadows[25],
     borderRadius: '12px',
     '& .MuiFormHelperText-root': {
       display: 'block',
@@ -79,17 +84,20 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const Register = ({}) => {
+export const Register = ({ authService }) => {
   const classes = useStyles();
-  const global = useGlobalStyles();
 
-  const initialValues = {
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-    passwordConfirm: '',
-  };
+  const [state, send] = useActor(authService);
+
+  useEffect(() => {
+    send({ type: 'UNAUTHORIZED' });
+  }, []);
+
+  useEffect(() => {
+    if (state.matches('done')) {
+      setTimeout(() => window.location.replace(login), 1000);
+    }
+  }, [state]);
 
   return (
     <div className={classes.paper} style={{ width: '650px' }}>
@@ -98,13 +106,22 @@ export const Register = ({}) => {
         validationSchema={validationSignUpSchema}
         onSubmit={async (values, { setSubmitting }) => {
           setSubmitting(true);
+          send({ type: 'REGISTER', value: values });
         }}
       >
-        {({ setFieldValue, isValid, isSubmitting }) => (
+        {() => (
           <Form className={classes.form}>
             <div className={classes.header}>
               <MediumTitle title='Register' />
             </div>
+            {state.matches('failure') && (
+              <Alert severity='error'>{state.context.error}</Alert>
+            )}
+            {state.matches('done') && (
+              <Alert severity='success'>
+                Successully registered! Redirecting...
+              </Alert>
+            )}
             <Field name='email'>
               {({ field, meta: { touched, error, value, initialValue } }) => (
                 <TextBox
@@ -121,7 +138,7 @@ export const Register = ({}) => {
             </Field>
             <div className={classes.flexFieldBox}>
               <div>
-                <Field name='firstName'>
+                <Field name='first_name'>
                   {({
                     field,
                     meta: { touched, error, value, initialValue },
@@ -138,7 +155,7 @@ export const Register = ({}) => {
                 </Field>
               </div>
               <div style={{ marginLeft: '10px' }}>
-                <Field name='lastName'>
+                <Field name='last_name'>
                   {({
                     field,
                     meta: { touched, error, value, initialValue },
@@ -168,7 +185,7 @@ export const Register = ({}) => {
                 />
               )}
             </Field>
-            <Field name='passwordConfirm'>
+            <Field name='password_confirm'>
               {({ field, meta: { touched, error, value, initialValue } }) => (
                 <TextBox
                   label='Confirm Password'
@@ -182,14 +199,15 @@ export const Register = ({}) => {
               )}
             </Field>
             <div style={{ marginTop: '32px', marginBottom: '32px' }}>
-              <ContainedButton
-                text='Register'
-                onClick={() => console.log('hello')}
+              <LoadingButton
+                type='submit'
+                loading={state.matches('register') || state.matches('done')}
+                variant='contained'
                 fullWidth
-              />
+              >
+                Register
+              </LoadingButton>
             </div>
-            <Divider flexItem>OR</Divider>
-            <Google send={() => console.log('hello')} />
             <Grid container justifyContent='center'>
               <Grid item>
                 <Link to={login} className={classes.link}>
