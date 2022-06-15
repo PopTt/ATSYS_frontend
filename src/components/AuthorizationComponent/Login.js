@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@mui/styles';
 import { useActor } from '@xstate/react';
 import { Link } from 'react-router-dom';
@@ -11,7 +11,19 @@ import PasswordIcon from '@mui/icons-material/Lock';
 
 import { home, register } from '../../routes/route_paths.js';
 import { TextBox } from '../../frameworks/Form.js';
-import { MediumTitle } from '../../frameworks/Title.js';
+import { MediumTitle } from '../../frameworks/Typography.js';
+
+const initialValues = {
+  email: '',
+  password: '',
+};
+
+const validationSignInSchema = object({
+  email: string().required('Email is required'),
+  password: string()
+    .min(6, 'Password must be at least 6 characters')
+    .required('Password is required'),
+});
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -51,30 +63,20 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const initialValues = {
-  email: '',
-  password: '',
-};
-
-const validationSignInSchema = object({
-  email: string().required('Email is required'),
-  password: string()
-    .min(6, 'Password must be at least 6 characters')
-    .required('Password is required'),
-});
-
 export const Login = ({ authService }) => {
   const classes = useStyles();
 
+  const [isExpire, setIsExpire] = useState(false);
   const [state, send] = useActor(authService);
 
   useEffect(() => {
+    if (state.matches('expire')) setIsExpire(true);
     send({ type: 'UNAUTHORIZED' });
   }, []);
 
   useEffect(() => {
     if (state.matches('authorized')) {
-      window.location.replace(home);
+      window.location.href = home;
     }
   }, [state]);
 
@@ -95,6 +97,11 @@ export const Login = ({ authService }) => {
             </div>
             {state.matches('failure') && (
               <Alert severity='error'>{state.context.error}</Alert>
+            )}
+            {isExpire && (
+              <Alert severity='error'>
+                Session Expired. Please login again.
+              </Alert>
             )}
             <Field name='email'>
               {({ field, meta: { touched, error, value, initialValue } }) => (

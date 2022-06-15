@@ -5,14 +5,13 @@ import { login, register, logout } from '../queries/AuthorizationQueries.js';
 
 const USER_AUTH_TOKEN = 'user_authorize_token';
 
-//return a new user class instance
-const defineUser = (user) => {
+export const defineUser = (user, permission_type) => {
   return new User(
     user.user_id,
     user.first_name,
     user.last_name,
     user.email,
-    PermissionType.User,
+    permission_type,
     user.admin_id
   );
 };
@@ -22,6 +21,7 @@ export const UserAuthorizationMachine = createMachine(
     id: 'user_auth_machine',
     context: {
       user: undefined,
+      error: '',
     },
     initial: 'unauthorized',
     states: {
@@ -48,7 +48,13 @@ export const UserAuthorizationMachine = createMachine(
       },
       authorized: {
         on: {
+          EXPIRE: { target: 'expire' },
           LOGOUT: { target: 'logout' },
+        },
+      },
+      expire: {
+        on: {
+          unauthorized: 'unauthorized',
         },
       },
       register: {
@@ -92,7 +98,7 @@ export const UserAuthorizationMachine = createMachine(
         return login(event.value);
       },
       Register: async (context, event) => {
-        let new_user = defineUser(event.value);
+        let new_user = defineUser(event.value, PermissionType.User);
         let password = { password: event.value.password };
         let user_with_password = Object.assign(new_user, password);
 

@@ -23,7 +23,7 @@ export class User {
   }
 
   getId() {
-    return this._id;
+    return this.user_id;
   }
 
   getFullName() {

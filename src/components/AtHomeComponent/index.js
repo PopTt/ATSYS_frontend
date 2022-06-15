@@ -17,11 +17,11 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import EventIcon from '@mui/icons-material/Event';
 
 import { UserEvent } from '../EventComponent/UserEvent.js';
-import { BigTitle } from '../../frameworks/Title.js';
+import { BigTitle } from '../../frameworks/Typography.js';
 
 const drawerWidth = 240;
 
-export const UserHome = ({ authService }) => {
+export const Home = ({ authService, user }) => {
   const [currentSection, setCurrentSection] = useState(0);
 
   return (
@@ -67,19 +67,21 @@ export const UserHome = ({ authService }) => {
       </Drawer>
       <Box component='main' sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
-        {currentSection == 0 && <Dashboard authService={authService} />}
-        {currentSection == 1 && <UserEvent authService={authService} />}
+        {currentSection == 0 && (
+          <Dashboard authService={authService} user={user} />
+        )}
+        {currentSection == 1 && (
+          <UserEvent authService={authService} user={user} />
+        )}
       </Box>
     </Box>
   );
 };
 
-const Dashboard = ({ authService }) => {
-  const [user_state, user_send] = useActor(authService);
-
+const Dashboard = ({ authService, user }) => {
   return (
     <div>
-      <BigTitle title={`Welcome Back, ${user_state.context.user.last_name}`} />
+      <BigTitle title={`Welcome Back, ${user.getFullName()}`} />
     </div>
   );
 };

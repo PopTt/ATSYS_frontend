@@ -1,11 +1,9 @@
 import React from 'react';
-import { Switch } from 'react-router';
+import { Switch, Redirect } from 'react-router';
 
 import * as Path from './route_paths.js';
 import { Home } from '../containers/AtHome.js';
 import AuthorizedRoute from './AuthorizedRoute.js';
-
-require('dotenv').config();
 
 const AuthorizedRoutes = ({ isLogin, authService }) => {
   return (

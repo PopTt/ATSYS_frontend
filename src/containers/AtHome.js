@@ -2,30 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { useActor } from '@xstate/react';
 
 import { Loading } from '../components/LoadingComponent/CircularLoading.js';
-import { UserHome } from '../components/AtHomeComponent/UserHome.js';
-import * as PermissionChecker from '../helpers/permission.js';
+import { defineUser } from '../machines/UserAuthorizationMachine.js';
+import { Home as HomeComponent } from '../components/AtHomeComponent';
 
 export const Home = ({ authService }) => {
-  const [managementPermission, setManagementPermission] = useState(undefined);
-  const [state, send] = useActor(authService);
+  const [user, setUser] = useState(undefined);
+  const [state] = useActor(authService);
 
-  useEffect(
-    () =>
-      setManagementPermission(
-        PermissionChecker.AdminInstLevelPermission(
-          state.context.user.permission_type
-        )
-      ),
-    [authService]
-  );
+  useEffect(() => {
+    setUser(defineUser(state.context.user, state.context.user.permission_type));
+  }, [authService]);
 
-  return (
-    <div>
-      {managementPermission !== undefined ? (
-        <>{!managementPermission && <UserHome authService={authService} />}</>
-      ) : (
-        <Loading loadingText='Granting Permission' />
-      )}
-    </div>
+  return user !== undefined ? (
+    <HomeComponent authService={authService} user={user} />
+  ) : (
+    <Loading loadingText='Granting Permission' />
   );
 };

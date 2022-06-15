@@ -8,7 +8,7 @@ import { Alert, Grid } from '@mui/material';
 import { string, object, ref } from 'yup';
 
 import { login } from '../../routes/route_paths.js';
-import { MediumTitle } from '../../frameworks/Title.js';
+import { MediumTitle } from '../../frameworks/Typography.js';
 import { TextBox } from '../../frameworks/Form.js';
 
 const initialValues = {

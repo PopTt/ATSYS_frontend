@@ -23,3 +23,12 @@ export const BigTitle = ({ title, size = 26, weight = 600 }) => {
     </Typography>
   );
 };
+
+export const Text = ({ text, readmore = false, maxLength = 140 }) => {
+  let dot = text.length > 140 ? '...' : '';
+  return (
+    <Typography paragraph style={{ textAlign: 'justify' }}>
+      {readmore ? text.substring(0, maxLength) + dot : text}
+    </Typography>
+  );
+};

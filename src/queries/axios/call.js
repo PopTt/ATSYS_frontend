@@ -1,5 +1,4 @@
 import { httpClient } from './http.js';
-import { ErrorCode } from './errorCode.js';
 
 /*
 Props {
@@ -9,40 +8,37 @@ Props {
 */
 
 require('dotenv').config();
-const ACCESS_TOKEN = process.env.REACT_APP_ACCESS_TOKEN;
 
 const config = {
   headers: {
-    Authorization: `Bearer ${localStorage.getItem(ACCESS_TOKEN)}`,
+    authorization: `Bearer ${localStorage.getItem(
+      process.env.REACT_APP_ACCESS_TOKEN
+    )}`,
   },
 };
 
-export const Post = async (props) => {
+export const Post = async (url, data) => {
   return await httpClient
-    .post(
-      props.url,
-      {
-        data: props.event,
-      },
-      config
-    )
+    .post(url, data, config)
     .then((res) => {
-      return res;
+      return res.data;
     })
     .catch((err) => {
-      ErrorCode(err.response.status);
+      if (err.response.status === 401)
+        localStorage.removeItem(process.env.REACT_APP_ACCESS_TOKEN);
+      throw new Error(err.response.data.message);
     });
 };
 
-export const Get = async (props) => {
+export const Get = async (url) => {
   return await httpClient
-    .get(props.url, config)
+    .get(url, config)
     .then((res) => {
-      if (res.status === 200) {
-        return res.data;
-      }
+      return res.data;
     })
     .catch((err) => {
-      ErrorCode(err.response.status);
+      if (err.response.status === 401)
+        localStorage.removeItem(process.env.REACT_APP_ACCESS_TOKEN);
+      throw new Error(err.response.data.message);
     });
 };
