@@ -1,18 +1,25 @@
-export var AccountType;
-(function (AccountType) {
-  AccountType[(AccountType['STUDENT'] = 0)] = 'student';
-  AccountType[(AccountType['TEACHER'] = 1)] = 'Teacher';
-  AccountType[(AccountType['ADMIN'] = 2)] = 'Admin';
-})(AccountType || (AccountType = {}));
+export var PermissionType;
+(function (PermissionType) {
+  PermissionType[(PermissionType['Admin'] = 0)] = 'Admin';
+  PermissionType[(PermissionType['Instructor'] = 1)] = 'Instructor';
+  PermissionType[(PermissionType['User'] = 2)] = 'User';
+})(PermissionType || (PermissionType = {}));
 
 export class User {
-  constructor(_id, first_name, last_name, email, account_type, google_id) {
-    this._id = _id;
+  constructor(
+    user_id,
+    first_name,
+    last_name,
+    email,
+    permission_type,
+    admin_id
+  ) {
+    this.user_id = user_id;
     this.first_name = first_name;
     this.last_name = last_name;
     this.email = email;
-    this.account_type = account_type;
-    this.google_id = google_id;
+    this.permission_type = permission_type;
+    this.admin_id = admin_id;
   }
 
   getId() {
@@ -27,7 +34,7 @@ export class User {
     return this.email;
   }
 
-  getAccountType() {
-    return AccountType[this.account_type];
+  getPermissionType() {
+    return PermissionType[this.permission_type];
   }
 }
