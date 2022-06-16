@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { Typography } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';

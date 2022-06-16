@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useActor } from '@xstate/react';
+import React, { useState } from 'react';
 import {
   Box,
   Drawer,
   AppBar,
   Toolbar,
-  Typography,
   Divider,
   List,
   ListItem,
@@ -16,7 +14,7 @@ import {
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import EventIcon from '@mui/icons-material/Event';
 
-import { UserEvent } from '../EventComponent/UserEvent.js';
+import { UserEvent } from '../EventComponent/index.js';
 import { BigTitle } from '../../frameworks/Typography.js';
 
 const drawerWidth = 240;
@@ -31,9 +29,7 @@ export const Home = ({ authService, user }) => {
         sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
       >
         <Toolbar>
-          <Typography variant='h6' noWrap component='div'>
-            AtSys
-          </Typography>
+          <BigTitle title='AtSys' weight='500' />
         </Toolbar>
       </AppBar>
       <Drawer

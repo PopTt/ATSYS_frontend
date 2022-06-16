@@ -6,6 +6,7 @@ import { Alert } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
 import { string, object } from 'yup';
 
+import { ServerError } from '../FailureComponent/ServerFailure.js';
 import { EventMachine } from '../../machines/EventMachine.js';
 import { DefaultModal } from '../../frameworks/Modal.js';
 import { TextBox } from '../../frameworks/Form.js';
@@ -37,7 +38,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export const CreateModal = ({ open, setOpen, user, refresh }) => {
+export const CreateModal = ({ authService, open, setOpen, user, refresh }) => {
   const classes = useStyles();
 
   const [state, send] = useMachine(EventMachine(undefined));
@@ -71,7 +72,14 @@ export const CreateModal = ({ open, setOpen, user, refresh }) => {
         {() => (
           <Form className={classes.form}>
             {state.matches('failure') && (
-              <Alert severity='error'>{state.context.error}</Alert>
+              <>
+                <Alert severity='error'>{state.context.error}</Alert>{' '}
+                <ServerError
+                  authService={authService}
+                  error={state.context.error}
+                  hide
+                />
+              </>
             )}
             {state.matches('done') && (
               <Alert severity='success'>Successully Created.</Alert>

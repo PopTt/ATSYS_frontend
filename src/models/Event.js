@@ -18,4 +18,16 @@ export class Event {
   getId() {
     return this.event_id;
   }
+
+  getEventName() {
+    return this.event_name;
+  }
+
+  getEventDescription() {
+    return this.event_description;
+  }
+
+  getCreatedDate() {
+    return this.established_time;
+  }
 }

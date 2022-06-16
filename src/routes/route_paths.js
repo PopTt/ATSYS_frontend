@@ -10,6 +10,10 @@ export const logout = '/logout';
 //Home
 export const home = '/AtHome';
 
+//Event
+export const event = '/AtEvent';
+export const event_route = '/AtEvent/:event_id';
+
 export const GetURLSearchParams = (key) => {
   return new URLSearchParams(window.location.search).get(key);
 };

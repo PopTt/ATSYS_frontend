@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@mui/styles';
-import { useActor, useMachine } from '@xstate/react';
+import { useMachine } from '@xstate/react';
 import { Button } from '@mui/material';
 
 import { CreateModal } from './Create.js';
@@ -8,12 +8,11 @@ import { JoinModal } from './Join.js';
 import { Loading } from '../LoadingComponent/CircularLoading.js';
 import { ServerError } from '../FailureComponent/ServerFailure.js';
 import { EventsMachine } from '../../machines/EventMachine.js';
+import { event as event_path } from '../../routes/route_paths.js';
 import { useGlobalStyles } from '../../helpers/styles.js';
 import * as PermissionChecker from '../../helpers/permission.js';
 import { ListItem } from '../../frameworks/ListItem.js';
 import { SmallTitle, BigTitle, Text } from '../../frameworks/Typography.js';
-
-require('dotenv').config();
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -26,6 +25,7 @@ const useStyles = makeStyles(() => ({
     minHeight: '200px',
     maxHeight: '250px',
     marginRight: '12px',
+    verticalAlign: 'top',
   },
 }));
 
@@ -40,11 +40,10 @@ export const UserEvent = ({ authService, user }) => {
   const [create, setCreate] = useState(false);
   const [join, setJoin] = useState(false);
 
-  const [_, toggle_expire] = useActor(authService);
   const [state, send] = useMachine(EventsMachine);
 
   useEffect(() => {
-    send({ type: 'GET_EVENTS', params: { user_id: user.getId() } });
+    send({ type: 'GET_EVENTS', params: { admin_id: user.getId() } });
   }, [user]);
 
   return (
@@ -65,19 +64,41 @@ export const UserEvent = ({ authService, user }) => {
       </div>
       {state.matches('loaded') && (
         <div style={{ marginTop: '32px' }}>
-          <ListItem className={classes.item}>
-            <SmallTitle title='Event 01' weight='600' />
-            <Text
-              text='Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur at tempus justo, in eleifend dui. Mauris consequat nibh at nunc varius consequat. Proin egestas justo quis lacus porttitor viverra. Duis et auctor lorem, nec tincidunt tortor. Suspendisse sem libero, fringilla sed imperdiet in, viverra a mi. Ut in venenatis magna. Nulla facilisi. Donec sit amet viverra tortor. Proin tellus felis, ultrices ac enim in, lobortis eleifend felis. Etiam pretium lacinia eros. Mauris dictum quam ut nibh faucibus eleifend. Nullam ornare metus sit amet tortor consequat, vitae luctus dui gravida. Fusce eu dapibus lectus. Duis tristique ligula erat, ut mattis augue aliquam non. Pellentesque quam ex, ornare in vehicula vel, euismod sit amet libero. Donec sed libero velit.'
-              readmore
-            />
-            <Button variant='outlined' style={{ float: 'right' }}>
-              Open
-            </Button>
-          </ListItem>
+          {state.context.events.length > 0 ? (
+            <div>
+              {state.context.events.map((event) => (
+                <ListItem className={classes.item} key={event.event_id}>
+                  <SmallTitle title={event.event_name} weight='600' />
+                  <div style={{ height: '120px' }}>
+                    <Text
+                      text={
+                        event.event_description == ''
+                          ? 'No description provided.'
+                          : event.event_description
+                      }
+                      readmore
+                    />
+                  </div>
+                  <Button
+                    variant='outlined'
+                    style={{ float: 'right' }}
+                    onClick={() =>
+                      (window.location.href = event_path + '/' + event.event_id)
+                    }
+                  >
+                    Open
+                  </Button>
+                </ListItem>
+              ))}
+            </div>
+          ) : (
+            <></>
+          )}
         </div>
       )}
-      {state.matches('failure') && <ServerError error={state.context.error} />}
+      {state.matches('failure') && (
+        <ServerError authService={authService} error={state.context.error} />
+      )}
       {state.matches('get_events') && <Loading />}
       {join && <JoinModal open={join} setOpen={setJoin} />}
       {create && (

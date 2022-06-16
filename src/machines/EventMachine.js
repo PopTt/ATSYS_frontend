@@ -1,15 +1,27 @@
 import { createMachine, assign, spawn } from 'xstate';
+import { Event } from '../models/Event.js';
 import {
   createEvent,
   fetchEvent,
   fetchEvents,
 } from '../queries/EventQueries.js';
 
+export const defineEvent = (event) => {
+  return new Event(
+    event.event_id,
+    event.event_name,
+    event.event_description,
+    event.established_time,
+    event.invitation_code,
+    event.admin_id
+  );
+};
+
 export const EventsMachine = createMachine(
   {
     id: 'events_machine',
     context: {
-      events: undefined,
+      events: [],
       error: '',
     },
     initial: 'idle',
@@ -31,7 +43,12 @@ export const EventsMachine = createMachine(
             actions: assign({ error: (context, event) => event.data.message }),
           },
         },
-        after: { 15000: { actions: assign({ error: 'timeout' }) } },
+        after: {
+          15000: {
+            target: 'failure',
+            actions: assign({ error: 'Request Timeout' }),
+          },
+        },
       },
       loaded: {
         on: {
@@ -48,14 +65,16 @@ export const EventsMachine = createMachine(
   {
     services: {
       GetEvents: async (context, event) => {
-        return fetchEvents(event.params['user_id']);
+        return await fetchEvents(event.params['admin_id']);
       },
     },
     actions: {
       AssignEvents: assign((ctx, event) =>
-        ctx.events.push({
-          ...event.data.data,
-          ref: spawn(EventMachine(event.data.data)),
+        event.data.data.map((event) => {
+          ctx.events.push({
+            ...event,
+            ref: spawn(EventMachine(event)),
+          });
         })
       ),
     },
@@ -92,7 +111,12 @@ export const EventMachine = (event) =>
               }),
             },
           },
-          after: { 15000: { actions: assign({ error: 'timeout' }) } },
+          after: {
+            15000: {
+              target: 'failure',
+              actions: assign({ error: 'Request Timeout' }),
+            },
+          },
         },
         get_event: {
           invoke: {
@@ -108,7 +132,12 @@ export const EventMachine = (event) =>
               }),
             },
           },
-          after: { 15000: { actions: assign({ error: 'timeout' }) } },
+          after: {
+            15000: {
+              target: 'failure',
+              actions: assign({ error: 'Request Timeout' }),
+            },
+          },
         },
         join_event: {
           invoke: {
@@ -123,7 +152,12 @@ export const EventMachine = (event) =>
               }),
             },
           },
-          after: { 15000: { actions: assign({ error: 'timeout' }) } },
+          after: {
+            15000: {
+              target: 'failure',
+              actions: assign({ error: 'Request Timeout' }),
+            },
+          },
         },
         done: {
           type: 'final',
@@ -141,10 +175,10 @@ export const EventMachine = (event) =>
     {
       services: {
         CreateEvent: async (context, event) => {
-          return createEvent(event.value);
+          return await createEvent(event.value);
         },
         GetEvent: async (context, event) => {
-          return fetchEvent(event.params['event_id']);
+          return await fetchEvent(event.params['event_id']);
         },
         JoinEvent: async (context, event) => {},
       },

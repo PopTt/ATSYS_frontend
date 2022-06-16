@@ -3,7 +3,7 @@ import { useActor } from '@xstate/react';
 
 import { Loading } from '../components/LoadingComponent/CircularLoading.js';
 import { defineUser } from '../machines/UserAuthorizationMachine.js';
-import { Home as HomeComponent } from '../components/AtHomeComponent';
+import { Home as HomeComponent } from '../components/HomeComponent';
 
 export const Home = ({ authService }) => {
   const [user, setUser] = useState(undefined);
@@ -16,6 +16,6 @@ export const Home = ({ authService }) => {
   return user !== undefined ? (
     <HomeComponent authService={authService} user={user} />
   ) : (
-    <Loading loadingText='Granting Permission' />
+    <Loading loadingText='Loading' />
   );
 };

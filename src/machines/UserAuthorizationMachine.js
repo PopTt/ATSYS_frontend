@@ -44,7 +44,12 @@ export const UserAuthorizationMachine = createMachine(
             actions: assign({ error: (context, event) => event.data.message }),
           },
         },
-        after: { 15000: { actions: assign({ error: 'timeout' }) } },
+        after: {
+          15000: {
+            target: 'failure',
+            actions: assign({ error: 'Request Timeout' }),
+          },
+        },
       },
       authorized: {
         on: {
@@ -54,7 +59,7 @@ export const UserAuthorizationMachine = createMachine(
       },
       expire: {
         on: {
-          unauthorized: 'unauthorized',
+          UNAUTHORIZED: 'unauthorized',
         },
       },
       register: {
@@ -68,7 +73,12 @@ export const UserAuthorizationMachine = createMachine(
             actions: assign({ error: (context, event) => event.data.message }),
           },
         },
-        after: { 15000: { actions: assign({ error: 'timeout' }) } },
+        after: {
+          15000: {
+            target: 'failure',
+            actions: assign({ error: 'Request Timeout' }),
+          },
+        },
       },
       done: {
         on: {
@@ -95,17 +105,17 @@ export const UserAuthorizationMachine = createMachine(
   {
     services: {
       Login: async (context, event) => {
-        return login(event.value);
+        return await login(event.value);
       },
       Register: async (context, event) => {
         let new_user = defineUser(event.value, PermissionType.User);
         let password = { password: event.value.password };
         let user_with_password = Object.assign(new_user, password);
 
-        return register(user_with_password);
+        return await register(user_with_password);
       },
       Logout: async (context, event) => {
-        logout();
+        await logout();
         localStorage.setItem(USER_AUTH_TOKEN, '');
       },
     },
