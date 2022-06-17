@@ -1,32 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@mui/styles';
-import {
-  AppBar,
-  Box,
-  Button,
-  Toolbar,
-  Tabs,
-  Tab,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TablePagination,
-  TableRow,
-  Tooltip,
-  IconButton,
-} from '@mui/material';
+import { AppBar, Box, Button, Toolbar, Tabs, Tab } from '@mui/material';
 import { useMachine } from '@xstate/react';
 
+import { InstructorGrid } from '../AdminComponent/Instructor.js';
+import { UserTable } from '../UserComponent/Table.js';
 import { Loading } from '../LoadingComponent/CircularLoading.js';
-import { ServerError } from '../FailureComponent/ServerFailure.js';
-import { defineEvent, EventMachine } from '../../machines/EventMachine.js';
+import { EmptyError, ServerError } from '../FailureComponent/ServerFailure.js';
+import {
+  defineEvent,
+  EventMachine,
+  EventMembersMachine,
+} from '../../machines/EventMachine.js';
 import { useGlobalStyles } from '../../helpers/styles.js';
 import { SmallTitle, BigTitle, Text } from '../../frameworks/Typography.js';
+import { DefaultModal } from '../../frameworks/Modal.js';
 import { ListItem } from '../../frameworks/ListItem.js';
-import DeleteIcon from '@mui/icons-material/Delete';
 
 function TabPanel({ children, value, index }) {
   return (
@@ -54,6 +43,11 @@ const useStyles = makeStyles(() => ({
   container: {
     width: '100%',
     marginTop: '40px',
+  },
+  modal: {
+    width: '660px',
+    minHeight: '650px',
+    padding: '32px 48px',
   },
 }));
 
@@ -158,18 +152,11 @@ export const Event = ({ authService, user }) => {
               </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
-              <br />
-              <div
-                className={global.horizontal}
-                style={{ marginBottom: '10px' }}
-              >
-                <SmallTitle title='Event Member List' weight={500} size={16} />
-                <Button variant='outlined' style={{ marginLeft: 'auto' }}>
-                  Add Instructors
-                </Button>
-              </div>
-              <MemberTables />
-              <br />
+              <Members
+                authService={authService}
+                user={user}
+                event_id={event_id}
+              />
             </TabPanel>
             <TabPanel value={value} index={1}>
               Item Two
@@ -185,116 +172,118 @@ export const Event = ({ authService, user }) => {
   );
 };
 
-const columns = [
-  {
-    id: 'first_name',
-    label: 'First\u00a0Name',
-    minWidth: 100,
-  },
-  { id: 'last_name', label: 'Last\u00a0Name', minWidth: 180 },
-  {
-    id: 'email',
-    label: 'Email',
-    minWidth: 180,
-    align: 'center',
-  },
-  {
-    id: 'permission_type',
-    label: 'Permission\u00a0Type',
-    minWidth: 170,
-    align: 'center',
-  },
-  {
-    id: 'user_id',
-    label: 'Actions',
-    minWidth: 170,
-    align: 'center',
-  },
-];
+const Members = ({ authService, user, event_id }) => {
+  const global = useGlobalStyles();
 
-function createData(first_name, last_name, email, permission_type, user_id) {
-  return { first_name, last_name, email, permission_type, user_id };
-}
+  const [add, setAdd] = useState(false);
 
-const rows = [
-  createData(
-    'Lim',
-    'Jing Xiang',
-    'jingxiang1319@gmail.com',
-    'instructor',
-    '123'
-  ),
-];
+  const [state, send] = useMachine(EventMembersMachine);
 
-const MemberTables = () => {
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  useEffect(() => {
+    send({ type: 'GET_EVENT_MEMBERS', params: { event_id: event_id } });
+  }, [event_id]);
 
   return (
-    <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-      <TableContainer sx={{ maxHeight: 440 }}>
-        <Table stickyHeader aria-label='sticky table'>
-          <TableHead>
-            <TableRow>
-              {columns.map((column) => (
-                <TableCell
-                  key={column.id}
-                  align={column.align}
-                  style={{ minWidth: column.minWidth }}
-                >
-                  {column.label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row) => {
-                return (
-                  <TableRow tabIndex={-1} key={row.code}>
-                    {columns.map((column) => {
-                      const value = row[column.id];
-                      return (
-                        <>
-                          {column.id != 'user_id' ? (
-                            <TableCell key={column.id} align={column.align}>
-                              {column.format && typeof value === 'number'
-                                ? column.format(value)
-                                : value}
-                            </TableCell>
-                          ) : (
-                            <TableCell key={column.id} align={column.align}>
-                              <Tooltip title='Delete'>
-                                <IconButton>
-                                  <DeleteIcon />
-                                </IconButton>
-                              </Tooltip>
-                            </TableCell>
-                          )}
-                        </>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[10, 20, 50, 100]}
-        component='div'
-        count={rows.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={(event, newPage) => {
-          setPage(newPage);
-        }}
-        onRowsPerPageChange={(event) => {
-          setRowsPerPage(+event.target.value);
-          setPage(0);
-        }}
-      />
-    </Paper>
+    <div>
+      <br />
+      <div className={global.horizontal} style={{ marginBottom: '10px' }}>
+        <SmallTitle title='Event Member List' weight={500} size={16} />
+        {state.matches('loaded') && (
+          <Button
+            variant='outlined'
+            style={{ marginLeft: 'auto' }}
+            onClick={() => setAdd(true)}
+          >
+            Add Instructors
+          </Button>
+        )}
+      </div>
+      {state.matches('loaded') && (
+        <div style={{ marginTop: '32px' }}>
+          {state.context.members.length > 0 ? (
+            <div>
+              <UserTable users={state.context.members} remove={true} />
+            </div>
+          ) : (
+            <EmptyError flexCenter />
+          )}
+        </div>
+      )}
+      {state.matches('failure') && (
+        <ServerError
+          authService={authService}
+          error={state.context.error}
+          flexCenter
+        />
+      )}
+      {state.matches('get_event_members') && <Loading flexCenter />}
+      {add && (
+        <AddInstructor
+          authService={authService}
+          open={add}
+          setOpen={setAdd}
+          user={user}
+          event_id={event_id}
+          refresh={() =>
+            send({ type: 'REFRESH', params: { event_id: event_id } })
+          }
+        />
+      )}
+      <br />
+    </div>
+  );
+};
+
+const AddInstructor = ({
+  authService,
+  open,
+  setOpen,
+  user,
+  event_id,
+  refresh,
+}) => {
+  const classes = useStyles();
+
+  const [state, send] = useMachine(EventMembersMachine);
+
+  useEffect(() => {
+    send({
+      type: 'GET_NOT_IN_EVENT_INSTRUCTORS',
+      params: { admin_id: user.user_id, event_id: event_id },
+    });
+  }, [event_id]);
+
+  return (
+    <DefaultModal
+      header='Add Instructors'
+      open={open}
+      setOpen={setOpen}
+      className={classes.modal}
+    >
+      {state.matches('loaded') && (
+        <>
+          {state.context.instructors.length > 0 ? (
+            <div>
+              <InstructorGrid
+                authService={authService}
+                user={user}
+                users={state.context.instructors}
+                event_id={event_id}
+                refresh={() => {
+                  setOpen(false);
+                  refresh();
+                }}
+              />
+            </div>
+          ) : (
+            <EmptyError />
+          )}
+        </>
+      )}
+      {state.matches('failure') && (
+        <ServerError authService={authService} error={state.context.error} />
+      )}
+      {state.matches('get_event_members') && <Loading />}
+    </DefaultModal>
   );
 };

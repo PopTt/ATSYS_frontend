@@ -8,6 +8,11 @@ export const useGlobalStyles = makeStyles((theme) => ({
     textAlign: 'center',
     transform: 'translate(-50%, -50%)',
   },
+  flexCenter: {
+    display: 'block',
+    justifyContent: 'center',
+    textAlign: 'center',
+  },
   horizontal: {
     display: 'flex',
     flexDirection: 'row',

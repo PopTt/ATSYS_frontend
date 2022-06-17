@@ -1,9 +1,12 @@
 import { createMachine, assign, spawn } from 'xstate';
 import { Event } from '../models/Event.js';
 import {
+  addEventInstructors,
   createEvent,
   fetchEvent,
   fetchEvents,
+  fetchEventMembers,
+  fetchNotInEventInstructors,
 } from '../queries/EventQueries.js';
 
 export const defineEvent = (event) => {
@@ -69,14 +72,15 @@ export const EventsMachine = createMachine(
       },
     },
     actions: {
-      AssignEvents: assign((ctx, event) =>
+      AssignEvents: assign((ctx, event) => {
+        ctx.events = [];
         event.data.data.map((event) => {
           ctx.events.push({
             ...event,
             ref: spawn(EventMachine(event)),
           });
-        })
-      ),
+        });
+      }),
     },
   }
 );
@@ -87,6 +91,7 @@ export const EventMachine = (event) =>
       id: 'event_machine',
       context: {
         event: event,
+        users: undefined,
         error: '',
       },
       initial: 'idle',
@@ -189,3 +194,150 @@ export const EventMachine = (event) =>
       },
     }
   );
+
+export const EventMembersMachine = createMachine(
+  {
+    id: 'user_event_members_machine',
+    context: {
+      members: [],
+      instructors: [],
+      error: '',
+    },
+    initial: 'idle',
+    states: {
+      idle: {
+        on: {
+          ADD_EVENT_INSTRUCTORS: 'add_event_instructors',
+          GET_NOT_IN_EVENT_INSTRUCTORS: 'get_not_in_event_instructors',
+          GET_EVENT_MEMBERS: 'get_event_members',
+        },
+      },
+      add_event_instructors: {
+        invoke: {
+          src: 'AddEventInstructors',
+          onDone: {
+            target: 'done',
+          },
+          onError: {
+            target: 'failure',
+            actions: assign({
+              error: (context, event) => event.data.message,
+            }),
+          },
+        },
+        after: {
+          15000: {
+            target: 'failure',
+            actions: assign({ error: 'Request Timeout' }),
+          },
+        },
+      },
+      get_not_in_event_instructors: {
+        invoke: {
+          src: 'GetNotInEventInstructors',
+          onDone: {
+            target: 'loaded',
+            actions: 'AssignInstructors',
+          },
+          onError: {
+            target: 'failure',
+            actions: assign({
+              error: (context, event) => event.data.message,
+            }),
+          },
+        },
+        after: {
+          15000: {
+            target: 'failure',
+            actions: assign({ error: 'Request Timeout' }),
+          },
+        },
+      },
+      get_event_members: {
+        invoke: {
+          src: 'GetEventMembers',
+          onDone: {
+            target: 'loaded',
+            actions: 'AssignEventMembers',
+          },
+          onError: {
+            target: 'failure',
+            actions: assign({
+              error: (context, event) => event.data.message,
+            }),
+          },
+        },
+        after: {
+          15000: {
+            target: 'failure',
+            actions: assign({ error: 'Request Timeout' }),
+          },
+        },
+      },
+      done: {
+        type: 'final',
+      },
+      loaded: {
+        on: {
+          REFRESH: 'get_event_members',
+        },
+      },
+      failure: {
+        on: {
+          idle: 'idle',
+        },
+      },
+    },
+  },
+  {
+    services: {
+      AddEventInstructors: async (context, event) => {
+        return await addEventInstructors(event.value);
+      },
+      GetNotInEventInstructors: async (context, event) => {
+        return await fetchNotInEventInstructors(
+          event.params['admin_id'],
+          event.params['event_id']
+        );
+      },
+      GetEventMembers: async (context, event) => {
+        return await fetchEventMembers(event.params['event_id']);
+      },
+    },
+    actions: {
+      AssignInstructors: assign((ctx, event) => {
+        ctx.instructors = [];
+        ctx.instructors = event.data.data;
+      }),
+      AssignEventMembers: assign((ctx, event) => {
+        ctx.members = [];
+        event.data.data.map((member) => {
+          ctx.members.push({
+            ...member,
+            ref: spawn(EventMemberMachine(member)),
+          });
+        });
+      }),
+    },
+  }
+);
+
+export const EventMemberMachine = (user) =>
+  createMachine({
+    id: 'event_member_machine',
+    context: {
+      user: user,
+      error: '',
+    },
+    initial: 'idle',
+    states: {
+      idle: {
+        on: {
+          UPDATE: 'update',
+          REMOVE: 'remove',
+        },
+      },
+      update: {},
+      remove: {},
+    },
+  });

@@ -6,11 +6,10 @@ import { Button } from '@mui/material';
 import { CreateModal } from './Create.js';
 import { JoinModal } from './Join.js';
 import { Loading } from '../LoadingComponent/CircularLoading.js';
-import { ServerError } from '../FailureComponent/ServerFailure.js';
+import { EmptyError, ServerError } from '../FailureComponent/ServerFailure.js';
 import { EventsMachine } from '../../machines/EventMachine.js';
 import { event as event_path } from '../../routes/route_paths.js';
 import { useGlobalStyles } from '../../helpers/styles.js';
-import * as PermissionChecker from '../../helpers/permission.js';
 import { ListItem } from '../../frameworks/ListItem.js';
 import { SmallTitle, BigTitle, Text } from '../../frameworks/Typography.js';
 
@@ -29,13 +28,9 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export const UserEvent = ({ authService, user }) => {
+export const UserEvent = ({ authService, user, adminPermission }) => {
   const classes = useStyles();
   const global = useGlobalStyles();
-
-  const adminPermission = PermissionChecker.AdminLevelPermission(
-    user.permission_type
-  );
 
   const [create, setCreate] = useState(false);
   const [join, setJoin] = useState(false);
@@ -50,17 +45,19 @@ export const UserEvent = ({ authService, user }) => {
     <div className={classes.container}>
       <div className={global.horizontal}>
         <BigTitle title='Your Events' />
-        <div style={{ marginLeft: '32px' }}>
-          {adminPermission ? (
-            <Button variant='contained' onClick={() => setCreate(true)}>
-              Create Event
-            </Button>
-          ) : (
-            <Button variant='contained' onClick={() => setJoin(true)}>
-              Join Event
-            </Button>
-          )}
-        </div>
+        {state.matches('loaded') && (
+          <div style={{ marginLeft: '32px' }}>
+            {adminPermission ? (
+              <Button variant='contained' onClick={() => setCreate(true)}>
+                Create Event
+              </Button>
+            ) : (
+              <Button variant='contained' onClick={() => setJoin(true)}>
+                Join Event
+              </Button>
+            )}
+          </div>
+        )}
       </div>
       {state.matches('loaded') && (
         <div style={{ marginTop: '32px' }}>
@@ -92,7 +89,7 @@ export const UserEvent = ({ authService, user }) => {
               ))}
             </div>
           ) : (
-            <></>
+            <EmptyError />
           )}
         </div>
       )}

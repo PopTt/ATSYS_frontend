@@ -1,5 +1,4 @@
 import {
-  backend,
   login as login_path,
   register as register_path,
   log_out as logout_path,
@@ -11,7 +10,7 @@ const ACCESS_TOKEN = process.env.REACT_APP_ACCESS_TOKEN;
 
 export const login = async (user) => {
   return await httpClient
-    .post(backend + login_path, user, {
+    .post(login_path, user, {
       withCredentials: true,
     })
     .then((res) => {
@@ -25,7 +24,7 @@ export const login = async (user) => {
 
 export const register = async (user) => {
   return await httpClient
-    .post(backend + register_path, user, {
+    .post(register_path, user, {
       withCredentials: true,
     })
     .then(() => {
@@ -37,5 +36,5 @@ export const register = async (user) => {
 };
 
 export const logout = async () => {
-  await httpClient.post(backend + logout_path);
+  await httpClient.post(logout_path);
 };

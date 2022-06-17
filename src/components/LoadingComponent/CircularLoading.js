@@ -1,15 +1,20 @@
 import React from 'react';
-import { Typography } from '@mui/material';
-import CircularProgress from '@mui/material/CircularProgress';
-import Box from '@mui/material/Box';
+import { Box, CircularProgress, Typography } from '@mui/material';
+import clsx from 'clsx';
 
 import { useGlobalStyles } from '../../helpers/styles.js';
 
-export const Loading = ({ loadingText = '' }) => {
+export const Loading = ({ loadingText = '', flexCenter = false }) => {
   const global = useGlobalStyles();
 
   return (
-    <Box sx={{ display: 'flex' }} className={global.center}>
+    <Box
+      sx={{ display: 'flex' }}
+      className={clsx(
+        !flexCenter && global.center,
+        flexCenter && global.flexCenter
+      )}
+    >
       <CircularProgress />
       {loadingText !== '' && (
         <Typography component='p' variant='h4'>
