@@ -38,7 +38,9 @@ export const UserEvent = ({ authService, user, adminPermission }) => {
   const [state, send] = useMachine(EventsMachine);
 
   useEffect(() => {
-    send({ type: 'GET_EVENTS', params: { admin_id: user.getId() } });
+    if (adminPermission)
+      send({ type: 'GET_EVENTS', params: { admin_id: user.getId() } });
+    else send({ type: 'GET_USER_EVENTS', params: { user_id: user.getId() } });
   }, [user]);
 
   return (
@@ -96,8 +98,20 @@ export const UserEvent = ({ authService, user, adminPermission }) => {
       {state.matches('failure') && (
         <ServerError authService={authService} error={state.context.error} />
       )}
-      {state.matches('get_events') && <Loading />}
-      {join && <JoinModal open={join} setOpen={setJoin} />}
+      {(state.matches('get_events') || state.matches('get_user_events')) && (
+        <Loading />
+      )}
+      {join && (
+        <JoinModal
+          authService={authService}
+          open={join}
+          setOpen={setJoin}
+          user={user}
+          refresh={() => {
+            send({ type: 'GET_EVENTS', params: { user_id: user.getId() } });
+          }}
+        />
+      )}
       {create && (
         <CreateModal
           authService={authService}

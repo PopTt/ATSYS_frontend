@@ -13,6 +13,7 @@ import {
   EventMembersMachine,
 } from '../../machines/EventMachine.js';
 import { useGlobalStyles } from '../../helpers/styles.js';
+import * as PermissionChecker from '../../helpers/permission.js';
 import { SmallTitle, BigTitle, Text } from '../../frameworks/Typography.js';
 import { DefaultModal } from '../../frameworks/Modal.js';
 import { ListItem } from '../../frameworks/ListItem.js';
@@ -44,6 +45,12 @@ const useStyles = makeStyles(() => ({
     width: '100%',
     marginTop: '40px',
   },
+  dialog: {
+    minWidth: '600px',
+    maxWidth: '600px',
+    minHeight: '250px',
+    padding: '32px',
+  },
   modal: {
     width: '660px',
     minHeight: '650px',
@@ -56,11 +63,19 @@ export const Event = ({ authService, user }) => {
   const global = useGlobalStyles();
 
   const [event, setEvent] = useState(undefined);
+  const [invite, setInvite] = useState(false);
   const [value, setValue] = React.useState(0);
 
   const [state, send] = useMachine(EventMachine(undefined));
 
   const event_id = window.location.pathname.split('/')[2];
+
+  const adminPermission = PermissionChecker.AdminLevelPermission(
+    user.permission_type
+  );
+
+  const adminInstructorPermission =
+    PermissionChecker.AdminInstructorLevelPermission(user.permission_type);
 
   useEffect(() => {
     send({ type: 'GET_EVENT', params: { event_id: event_id } });
@@ -94,45 +109,41 @@ export const Event = ({ authService, user }) => {
           <Box component='main' className={classes.container}>
             <Toolbar />
             <div>
-              {event.getEventDescription() !== '' ? (
-                <ListItem
-                  style={{
-                    width: '1000px',
-                    height: '290px',
-                    padding: '32px',
-                    margin: '0 auto',
-                  }}
-                >
-                  <BigTitle title={event.getEventName()} />
-                  <div style={{ marginBottom: '4px' }}></div>
-                  <div style={{ height: '160px' }}>
+              <ListItem
+                style={{
+                  width: '1000px',
+                  height: '290px',
+                  padding: '32px',
+                  margin: '0 auto',
+                  cursor: 'default',
+                }}
+              >
+                <BigTitle title={event.getEventName()} />
+                <div style={{ marginBottom: '4px' }}></div>
+                <div style={{ height: '160px' }}>
+                  {event.getEventDescription() !== '' ? (
                     <Text text={event.getEventDescription()} />
-                  </div>
-                  <Button variant='outlined'>Update Event</Button>
-                </ListItem>
-              ) : (
-                <ListItem
-                  style={{
-                    width: '1000px',
-                    height: '140px',
-                    padding: '32px',
-                    margin: '0 auto',
-                  }}
-                >
-                  <div
-                    className={global.horizontal}
-                    style={{ marginBottom: '20px' }}
-                  >
-                    <BigTitle title={event.getEventName()} />
-                    <Button variant='outlined' style={{ marginLeft: '24px' }}>
-                      Update Event
+                  ) : (
+                    <i>
+                      <Text text='No description provided.' />
+                    </i>
+                  )}
+                </div>
+                <div className={global.horizontal}>
+                  {adminPermission && (
+                    <Button variant='contained'>Update Event</Button>
+                  )}
+                  {adminInstructorPermission && (
+                    <Button
+                      variant='outlined'
+                      onClick={() => setInvite(true)}
+                      style={{ marginLeft: adminPermission ? '12px' : '0px' }}
+                    >
+                      Invite Users
                     </Button>
-                  </div>
-                  <i>
-                    <Text text='No description provided.' />
-                  </i>
-                </ListItem>
-              )}
+                  )}
+                </div>
+              </ListItem>
             </div>
             <Box
               sx={{
@@ -147,19 +158,21 @@ export const Event = ({ authService, user }) => {
                 onChange={(_, value) => setValue(value)}
                 aria-label='basic tabs example'
               >
-                <Tab label='Members' />
                 <Tab label='Attendances' />
+                {adminInstructorPermission && <Tab label='Members' />}
               </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
+              <></>
+            </TabPanel>
+            <TabPanel value={value} index={1}>
               <Members
                 authService={authService}
                 user={user}
                 event_id={event_id}
+                adminPermission={adminPermission}
+                adminInstructorPermission={adminInstructorPermission}
               />
-            </TabPanel>
-            <TabPanel value={value} index={1}>
-              Item Two
             </TabPanel>
           </Box>
         </Box>
@@ -168,11 +181,94 @@ export const Event = ({ authService, user }) => {
         <ServerError authService={authService} error={state.context.error} />
       )}
       {state.matches('get_event') && <Loading />}
+      {invite && (
+        <InviteModal
+          authService={authService}
+          open={invite}
+          setOpen={setInvite}
+          event_id={event_id}
+        />
+      )}
     </>
   );
 };
 
-const Members = ({ authService, user, event_id }) => {
+const InviteModal = ({ authService, open, setOpen, event_id }) => {
+  const classes = useStyles();
+
+  const [button, setButton] = useState('Copy');
+
+  const [state, send] = useMachine(EventMachine(undefined));
+
+  useEffect(() => {
+    send({
+      type: 'GET_INVITATION_CODE',
+      params: { event_id: event_id },
+    });
+  }, [event_id]);
+
+  return (
+    <DefaultModal
+      open={open}
+      onClose={() => setOpen(false)}
+      className={classes.dialog}
+    >
+      <BigTitle title='Event Invitation' />
+      {state.matches('loaded') && (
+        <div style={{ marginTop: '12px' }}>
+          <Text text='Copy the invitation code below and send it to your students or instructors to join this event.' />
+          <input
+            style={{
+              marginTop: '10px',
+              resize: 'none',
+              background: '#f5f5f5',
+              border: '0 solid transparent',
+              borderRadius: '5px',
+              width: '100%',
+              padding: '12px',
+              fontSize: '16px',
+            }}
+            value={state.context.event.invitation_code}
+            readOnly
+          />
+          <div style={{ marginTop: '24px' }}>
+            <Button
+              onClick={() => {
+                navigator.clipboard.writeText(
+                  state.context.event.invitation_code
+                );
+                setButton('Copied!');
+              }}
+              variant='contained'
+              disabled={button === 'Copied!' ? true : false}
+            >
+              {button}
+            </Button>
+            <Button
+              style={{ marginLeft: '12px' }}
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+          <br />
+        </div>
+      )}
+      {state.matches('failure') && (
+        <ServerError authService={authService} error={state.context.error} />
+      )}
+      {state.matches('get_invitation_code') && <Loading />}
+    </DefaultModal>
+  );
+};
+
+const Members = ({
+  authService,
+  user,
+  event_id,
+  adminPermission,
+  adminInstructorPermission,
+}) => {
   const global = useGlobalStyles();
 
   const [add, setAdd] = useState(false);
@@ -188,9 +284,9 @@ const Members = ({ authService, user, event_id }) => {
       <br />
       <div className={global.horizontal} style={{ marginBottom: '10px' }}>
         <SmallTitle title='Event Member List' weight={500} size={16} />
-        {state.matches('loaded') && (
+        {state.matches('loaded') && adminPermission && (
           <Button
-            variant='outlined'
+            variant='contained'
             style={{ marginLeft: 'auto' }}
             onClick={() => setAdd(true)}
           >
@@ -202,7 +298,10 @@ const Members = ({ authService, user, event_id }) => {
         <div style={{ marginTop: '32px' }}>
           {state.context.members.length > 0 ? (
             <div>
-              <UserTable users={state.context.members} remove={true} />
+              <UserTable
+                users={state.context.members}
+                remove={adminInstructorPermission}
+              />
             </div>
           ) : (
             <EmptyError flexCenter />

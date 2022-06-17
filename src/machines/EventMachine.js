@@ -3,7 +3,10 @@ import { Event } from '../models/Event.js';
 import {
   addEventInstructors,
   createEvent,
+  joinEvent,
   fetchEvent,
+  fetchUserEvents,
+  fetchInvitationCode,
   fetchEvents,
   fetchEventMembers,
   fetchNotInEventInstructors,
@@ -32,11 +35,31 @@ export const EventsMachine = createMachine(
       idle: {
         on: {
           GET_EVENTS: 'get_events',
+          GET_USER_EVENTS: 'get_user_events',
         },
       },
       get_events: {
         invoke: {
           src: 'GetEvents',
+          onDone: {
+            target: 'loaded',
+            actions: 'AssignEvents',
+          },
+          onError: {
+            target: 'failure',
+            actions: assign({ error: (context, event) => event.data.message }),
+          },
+        },
+        after: {
+          15000: {
+            target: 'failure',
+            actions: assign({ error: 'Request Timeout' }),
+          },
+        },
+      },
+      get_user_events: {
+        invoke: {
+          src: 'GetUserEvents',
           onDone: {
             target: 'loaded',
             actions: 'AssignEvents',
@@ -70,6 +93,9 @@ export const EventsMachine = createMachine(
       GetEvents: async (context, event) => {
         return await fetchEvents(event.params['admin_id']);
       },
+      GetUserEvents: async (context, event) => {
+        return await fetchUserEvents(event.params['user_id']);
+      },
     },
     actions: {
       AssignEvents: assign((ctx, event) => {
@@ -100,6 +126,7 @@ export const EventMachine = (event) =>
           on: {
             CREATE: 'creating',
             GET_EVENT: 'get_event',
+            GET_INVITATION_CODE: 'get_invitation_code',
             JOIN_EVENT: 'join_event',
           },
         },
@@ -126,6 +153,27 @@ export const EventMachine = (event) =>
         get_event: {
           invoke: {
             src: 'GetEvent',
+            onDone: {
+              target: 'loaded',
+              actions: 'AssignEvent',
+            },
+            onError: {
+              target: 'failure',
+              actions: assign({
+                error: (context, event) => event.data.message,
+              }),
+            },
+          },
+          after: {
+            15000: {
+              target: 'failure',
+              actions: assign({ error: 'Request Timeout' }),
+            },
+          },
+        },
+        get_invitation_code: {
+          invoke: {
+            src: 'GetInvitationCode',
             onDone: {
               target: 'loaded',
               actions: 'AssignEvent',
@@ -185,7 +233,12 @@ export const EventMachine = (event) =>
         GetEvent: async (context, event) => {
           return await fetchEvent(event.params['event_id']);
         },
-        JoinEvent: async (context, event) => {},
+        GetInvitationCode: async (context, event) => {
+          return await fetchInvitationCode(event.params['event_id']);
+        },
+        JoinEvent: async (context, event) => {
+          return await joinEvent(event.value);
+        },
       },
       actions: {
         AssignEvent: assign((ctx, event) => ({
