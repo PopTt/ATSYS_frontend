@@ -19,3 +19,9 @@ export const get_invitation_code = event_path + 'getInvitationCode';
 export const get_not_in_event_instructors =
   event_path + 'getNotInEventInstructors';
 export const get_event_members = event_path + 'getEventMembers';
+
+const attendance_path = backend + 'attendances/';
+export const get_event_attendances = attendance_path + 'getEventAttendances';
+export const get_users_event_attendances =
+  attendance_path + 'getUsersEventAttendances';
+export const create_attendance = attendance_path + 'create';

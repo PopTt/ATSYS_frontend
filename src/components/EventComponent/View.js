@@ -4,6 +4,7 @@ import { AppBar, Box, Button, Toolbar, Tabs, Tab } from '@mui/material';
 import { useMachine } from '@xstate/react';
 
 import { InstructorGrid } from '../AdminComponent/Instructor.js';
+import { EventAttendance } from '../AttendanceComponent/EventAttendance.js';
 import { UserTable } from '../UserComponent/Table.js';
 import { Loading } from '../LoadingComponent/CircularLoading.js';
 import { EmptyError, ServerError } from '../FailureComponent/ServerFailure.js';
@@ -163,7 +164,13 @@ export const Event = ({ authService, user }) => {
               </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
-              <></>
+              <EventAttendance
+                authService={authService}
+                user={user}
+                event_id={event_id}
+                adminPermission={adminPermission}
+                adminInstructorPermission={adminInstructorPermission}
+              />
             </TabPanel>
             <TabPanel value={value} index={1}>
               <Members
