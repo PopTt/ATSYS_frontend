@@ -79,6 +79,7 @@ export const InstructorManagement = ({
                     users={state.context.users}
                     edit={true}
                     remove={true}
+                    removeParams={{ role: user.permission_type }}
                     refresh={refresh}
                   />
                 </div>

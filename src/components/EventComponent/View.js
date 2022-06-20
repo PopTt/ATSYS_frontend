@@ -298,6 +298,10 @@ const Members = ({
 
   const [state, send] = useMachine(EventMembersMachine);
 
+  const refresh = () => {
+    send({ type: 'REFRESH', params: { event_id: event_id } });
+  };
+
   useEffect(() => {
     send({ type: 'GET_EVENT_MEMBERS', params: { event_id: event_id } });
   }, [event_id]);
@@ -322,8 +326,15 @@ const Members = ({
           {state.context.members.length > 0 ? (
             <div>
               <UserTable
+                authService={authService}
+                user={user}
                 users={state.context.members}
-                remove={adminInstructorPermission}
+                remove={true}
+                removeParams={{
+                  role: user.permission_type,
+                  event_id: event_id,
+                }}
+                refresh={refresh}
               />
             </div>
           ) : (

@@ -11,6 +11,7 @@ import {
   fetchEvents,
   fetchEventMembers,
   fetchNotInEventInstructors,
+  removeEventMember,
 } from '../queries/EventQueries.js';
 
 export const defineEvent = (event) => {
@@ -404,21 +405,59 @@ export const EventMembersMachine = createMachine(
 );
 
 export const EventMemberMachine = (user) =>
-  createMachine({
-    id: 'event_member_machine',
-    context: {
-      user: user,
-      error: '',
-    },
-    initial: 'idle',
-    states: {
-      idle: {
-        on: {
-          UPDATE: 'update',
-          REMOVE: 'remove',
+  createMachine(
+    {
+      id: 'event_member_machine',
+      context: {
+        user: user,
+        error: '',
+      },
+      initial: 'idle',
+      states: {
+        idle: {
+          on: {
+            REMOVE: 'removing',
+          },
+        },
+        removing: {
+          invoke: {
+            src: 'RemoveEventMember',
+            onDone: {
+              target: 'done',
+            },
+            onError: {
+              target: 'failure',
+              actions: assign({
+                error: (context, event) => event.data.message,
+              }),
+            },
+          },
+          after: {
+            15000: {
+              target: 'failure',
+              actions: assign({ error: 'Request Timeout' }),
+            },
+          },
+        },
+        done: {
+          type: 'final',
+        },
+        failure: {
+          on: {
+            REMOVE: 'removing',
+          },
         },
       },
-      update: {},
-      remove: {},
     },
-  });
+    {
+      services: {
+        RemoveEventMember: async (context, event) => {
+          return await removeEventMember({
+            user_id: context.user.user_id,
+            event_id: event.value.event_id,
+            role: event.value.role,
+          });
+        },
+      },
+    }
+  );

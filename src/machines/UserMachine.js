@@ -87,7 +87,7 @@ export const UserMachine = (user) =>
           on: {
             CREATE_INSTRUCTOR: 'create_instructor',
             UPDATE_INSTRUCTOR: 'update_instructor',
-            DELETE_INSTRUCTOR: 'delete_instructor',
+            REMOVE: 'removing',
           },
         },
         create_instructor: {
@@ -130,7 +130,7 @@ export const UserMachine = (user) =>
             },
           },
         },
-        delete_instructor: {
+        removing: {
           invoke: {
             src: 'DeleteInstructor',
             onDone: {
@@ -157,7 +157,7 @@ export const UserMachine = (user) =>
           on: {
             idle: 'idle',
             UPDATE_INSTRUCTOR: 'update_instructor',
-            DELETE_INSTRUCTOR: 'delete_instructor',
+            REMOVE: 'removing',
           },
         },
       },

@@ -15,6 +15,7 @@ export const add_event_instructors = event_path + 'addEventInstructors';
 export const create_event = event_path + 'create';
 export const update_event = event_path + 'update';
 export const join_event = event_path + 'join';
+export const remove_event_member = event_path + 'removeEventMember';
 export const get_event = event_path + 'getEvent';
 export const get_events = event_path + 'getEvents';
 export const get_user_events = event_path + 'getUserEvents';

@@ -57,6 +57,7 @@ export const UserTable = ({
   users,
   edit,
   remove,
+  removeParams,
   refresh,
 }) => {
   const [rows, setRows] = useState([]);
@@ -123,6 +124,7 @@ export const UserTable = ({
                                     authService={authService}
                                     user={user}
                                     remove={remove}
+                                    removeParams={removeParams}
                                     edit={edit}
                                     action={value}
                                     refresh={refresh}
@@ -160,7 +162,15 @@ export const UserTable = ({
   );
 };
 
-const Actions = ({ authService, user, remove, edit, action, refresh }) => {
+const Actions = ({
+  authService,
+  user,
+  remove,
+  removeParams,
+  edit,
+  action,
+  refresh,
+}) => {
   const [updateInstructor, setUpdateInstructor] = useState(false);
   const [removeInstructor, setRemoveInstructor] = useState(false);
 
@@ -189,13 +199,13 @@ const Actions = ({ authService, user, remove, edit, action, refresh }) => {
           setOpen={setRemoveInstructor}
           onClick={() =>
             send({
-              type: 'DELETE_INSTRUCTOR',
-              value: { role: user.permission_type },
+              type: 'REMOVE',
+              value: removeParams,
             })
           }
           failure={state.matches('failure')}
           success={state.matches('done')}
-          loading={state.matches('delete_instructor')}
+          loading={state.matches('removing')}
           error={state.context.error}
           successMessage='Successully Deleted! Closing...'
           refresh={refresh}
