@@ -19,7 +19,7 @@ const initialValues = {
   passwordConfirm: '',
 };
 
-const validationSignUpSchema = object({
+const validationRegisterSchema = object({
   email: string().required('Email is required'),
   password: string()
     .required('Password is required')
@@ -108,6 +108,7 @@ export const Register = ({ authService }) => {
           <MediumTitle title='Register' />
         </div>
         <RegisterForm
+          initialValues={initialValues}
           register={(values) => send({ type: 'REGISTER', value: values })}
           failure={state.matches('failure')}
           success={state.matches('done')}
@@ -129,6 +130,7 @@ export const Register = ({ authService }) => {
 };
 
 export const RegisterForm = ({
+  initialValues,
   register,
   failure,
   success,
@@ -141,7 +143,7 @@ export const RegisterForm = ({
   return (
     <Formik
       initialValues={initialValues}
-      validationSchema={validationSignUpSchema}
+      validationSchema={validationRegisterSchema}
       onSubmit={async (values, { setSubmitting }) => {
         setSubmitting(true);
         register(values);
@@ -229,6 +231,91 @@ export const RegisterForm = ({
               fullWidth
             >
               Register
+            </LoadingButton>
+          </div>
+        </Form>
+      )}
+    </Formik>
+  );
+};
+
+export const UpdateForm = ({
+  initialValues,
+  update,
+  failure,
+  success,
+  loading,
+  error,
+}) => {
+  const classes = useStyles();
+
+  const validationUpdateSchema = object({
+    email: string().required('Email is required'),
+    first_name: string().required('First Name is required'),
+    last_name: string().required('Last Name is required'),
+  });
+
+  return (
+    <Formik
+      initialValues={initialValues}
+      validationSchema={validationUpdateSchema}
+      onSubmit={async (values, { setSubmitting }) => {
+        setSubmitting(true);
+        update(values);
+      }}
+    >
+      {() => (
+        <Form className={classes.form}>
+          {failure && <Alert severity='error'>{error}</Alert>}
+          {success && (
+            <Alert severity='success'>Successully updated! Refreshing...</Alert>
+          )}
+          <Field name='email'>
+            {({ field, meta: { touched, error, value, initialValue } }) => (
+              <TextBox
+                label='Email'
+                type='email'
+                iconClass={classes.icon}
+                field={field}
+                touched={touched}
+                value={value}
+                initialValue={initialValue}
+                error={error}
+              />
+            )}
+          </Field>
+          <Field name='first_name'>
+            {({ field, meta: { touched, error, value, initialValue } }) => (
+              <TextBox
+                label='First Name'
+                field={field}
+                touched={touched}
+                value={value}
+                initialValue={initialValue}
+                error={error}
+              />
+            )}
+          </Field>
+          <Field name='last_name'>
+            {({ field, meta: { touched, error, value, initialValue } }) => (
+              <TextBox
+                label='Last Name'
+                field={field}
+                touched={touched}
+                value={value}
+                initialValue={initialValue}
+                error={error}
+              />
+            )}
+          </Field>
+          <div style={{ marginTop: '32px', marginBottom: '32px' }}>
+            <LoadingButton
+              type='submit'
+              loading={loading || success}
+              variant='contained'
+              fullWidth
+            >
+              Update
             </LoadingButton>
           </div>
         </Form>

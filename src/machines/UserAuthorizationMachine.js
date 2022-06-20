@@ -12,6 +12,7 @@ export const defineUser = (user, permission_type) => {
     user.last_name,
     user.email,
     permission_type,
+    user.status,
     user.admin_id
   );
 };

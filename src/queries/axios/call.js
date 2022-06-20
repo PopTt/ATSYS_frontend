@@ -30,6 +30,19 @@ export const Post = async (url, data) => {
     });
 };
 
+export const Delete = async (url, data) => {
+  return await httpClient
+    .delete(url, { ...config, data: data })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      if (err.response.status === 401)
+        localStorage.removeItem(process.env.REACT_APP_ACCESS_TOKEN);
+      throw new Error(err.response.data.message);
+    });
+};
+
 export const Get = async (url) => {
   return await httpClient
     .get(url, config)

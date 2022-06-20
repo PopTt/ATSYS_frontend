@@ -5,7 +5,10 @@ import { useMachine } from '@xstate/react';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { Alert, Button, LinearProgress } from '@mui/material';
 
-import { RegisterForm } from '../AuthorizationComponent/Register.js';
+import {
+  RegisterForm,
+  UpdateForm,
+} from '../AuthorizationComponent/Register.js';
 import { UserTable } from '../UserComponent/Table.js';
 import { Loading } from '../LoadingComponent/CircularLoading.js';
 import {
@@ -24,6 +27,11 @@ const useStyles = makeStyles(() => ({
   modal: {
     width: '500px',
     minHeight: '500px',
+    padding: '48px',
+  },
+  update: {
+    width: '500px',
+    minHeight: '350px',
     padding: '48px',
   },
 }));
@@ -66,9 +74,12 @@ export const InstructorManagement = ({
               {state.context.users.length > 0 ? (
                 <div>
                   <UserTable
+                    authService={authService}
+                    user={user}
                     users={state.context.users}
                     edit={true}
                     remove={true}
+                    refresh={refresh}
                   />
                 </div>
               ) : (
@@ -106,6 +117,14 @@ const CreateInstructor = ({ open, setOpen, user, refresh }) => {
 
   const [state, send] = useMachine(UserMachine);
 
+  const initialValues = {
+    email: '',
+    password: '',
+    first_name: '',
+    last_name: '',
+    passwordConfirm: '',
+  };
+
   useEffect(() => {
     if (state.matches('done')) {
       setTimeout(() => {
@@ -123,6 +142,7 @@ const CreateInstructor = ({ open, setOpen, user, refresh }) => {
       className={classes.modal}
     >
       <RegisterForm
+        initialValues={initialValues}
         register={(values) => {
           values.admin_id = user.getId();
           send({ type: 'CREATE_INSTRUCTOR', value: values });
@@ -132,6 +152,57 @@ const CreateInstructor = ({ open, setOpen, user, refresh }) => {
         loading={state.matches('create_instructor')}
         error={state.context.error}
         successMessage='Successully created! Refreshing...'
+      />
+    </DefaultModal>
+  );
+};
+
+export const UpdateInstructor = ({
+  open,
+  setOpen,
+  user,
+  instructor,
+  refresh,
+}) => {
+  const classes = useStyles();
+
+  const [state, send] = useMachine(UserMachine);
+
+  const initialValues = {
+    email: instructor.email,
+    password: '1q2w3E*1q2w3E*',
+    first_name: instructor.first_name,
+    last_name: instructor.last_name,
+    passwordConfirm: '1q2w3E*1q2w3E*',
+  };
+
+  useEffect(() => {
+    if (state.matches('done')) {
+      setTimeout(() => {
+        setOpen(false);
+        refresh();
+      }, 1000);
+    }
+  }, [state]);
+
+  return (
+    <DefaultModal
+      header='Update Instructor'
+      open={open}
+      setOpen={setOpen}
+      className={classes.update}
+    >
+      <UpdateForm
+        initialValues={initialValues}
+        update={(values) => {
+          values.role = user.permission_type;
+          values.user_id = instructor.user_id;
+          send({ type: 'UPDATE_INSTRUCTOR', value: values });
+        }}
+        failure={state.matches('failure')}
+        success={state.matches('done')}
+        loading={state.matches('update_instructor')}
+        error={state.context.error}
       />
     </DefaultModal>
   );

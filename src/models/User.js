@@ -1,3 +1,10 @@
+export var UserStatus;
+(function (UserStatus) {
+  UserStatus[(UserStatus['Active'] = 0)] = 'Active';
+  UserStatus[(UserStatus['Inactive'] = 1)] = 'Inactive';
+  UserStatus[(UserStatus['Deleted'] = 2)] = 'Deleted';
+})(UserStatus || (UserStatus = {}));
+
 export var PermissionType;
 (function (PermissionType) {
   PermissionType[(PermissionType['Admin'] = 0)] = 'Admin';
@@ -12,6 +19,7 @@ export class User {
     last_name,
     email,
     permission_type,
+    status,
     admin_id
   ) {
     this.user_id = user_id;
@@ -19,6 +27,7 @@ export class User {
     this.last_name = last_name;
     this.email = email;
     this.permission_type = permission_type;
+    this.status = status;
     this.admin_id = admin_id;
   }
 
@@ -36,5 +45,9 @@ export class User {
 
   getPermissionType() {
     return PermissionType[this.permission_type];
+  }
+
+  getStatus() {
+    return UserStatus[this.status];
   }
 }

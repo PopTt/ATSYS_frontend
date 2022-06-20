@@ -11,11 +11,14 @@ import {
   Tooltip,
   IconButton,
 } from '@mui/material';
+import { useActor } from '@xstate/react';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
+import { UpdateInstructor } from '../AdminComponent/Instructor.js';
 import { Loading } from '../LoadingComponent/CircularLoading.js';
 import { PermissionType } from '../../models/User.js';
+import { ConfirmationModal } from '../../frameworks/Modal.js';
 
 const columns = [
   {
@@ -37,18 +40,25 @@ const columns = [
     align: 'center',
   },
   {
-    id: 'user_id',
+    id: 'actions',
     label: 'Actions',
     minWidth: 170,
     align: 'center',
   },
 ];
 
-function createData(first_name, last_name, email, permission_type, user_id) {
-  return { first_name, last_name, email, permission_type, user_id };
+function createData(first_name, last_name, email, permission_type, ref) {
+  return { first_name, last_name, email, permission_type, actions: ref };
 }
 
-export const UserTable = ({ users, edit, remove }) => {
+export const UserTable = ({
+  authService,
+  user,
+  users,
+  edit,
+  remove,
+  refresh,
+}) => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = React.useState(0);
@@ -64,7 +74,7 @@ export const UserTable = ({ users, edit, remove }) => {
           user.last_name,
           user.email,
           PermissionType[user.permission_type],
-          user.user_id
+          user.ref
         )
       );
     });
@@ -101,7 +111,7 @@ export const UserTable = ({ users, edit, remove }) => {
                           const value = row[column.id];
                           return (
                             <>
-                              {column.id != 'user_id' ? (
+                              {column.id != 'actions' ? (
                                 <TableCell key={column.id} align={column.align}>
                                   {column.format && typeof value === 'number'
                                     ? column.format(value)
@@ -109,20 +119,14 @@ export const UserTable = ({ users, edit, remove }) => {
                                 </TableCell>
                               ) : (
                                 <TableCell key={column.id} align={column.align}>
-                                  {edit !== undefined && (
-                                    <Tooltip title='Edit'>
-                                      <IconButton>
-                                        <EditIcon />
-                                      </IconButton>
-                                    </Tooltip>
-                                  )}
-                                  {remove !== undefined && (
-                                    <Tooltip title='Delete'>
-                                      <IconButton>
-                                        <DeleteIcon />
-                                      </IconButton>
-                                    </Tooltip>
-                                  )}
+                                  <Actions
+                                    authService={authService}
+                                    user={user}
+                                    remove={remove}
+                                    edit={edit}
+                                    action={value}
+                                    refresh={refresh}
+                                  />
                                 </TableCell>
                               )}
                             </>
@@ -151,6 +155,60 @@ export const UserTable = ({ users, edit, remove }) => {
         </Paper>
       ) : (
         <Loading />
+      )}
+    </>
+  );
+};
+
+const Actions = ({ authService, user, remove, edit, action, refresh }) => {
+  const [updateInstructor, setUpdateInstructor] = useState(false);
+  const [removeInstructor, setRemoveInstructor] = useState(false);
+
+  const [state, send] = useActor(action);
+
+  return (
+    <>
+      {edit !== undefined && (
+        <Tooltip title='Edit'>
+          <IconButton onClick={() => setUpdateInstructor(true)}>
+            <EditIcon />
+          </IconButton>
+        </Tooltip>
+      )}
+      {remove !== undefined && (
+        <Tooltip title='Delete'>
+          <IconButton onClick={() => setRemoveInstructor(true)}>
+            <DeleteIcon />
+          </IconButton>
+        </Tooltip>
+      )}
+      {removeInstructor && (
+        <ConfirmationModal
+          authService={authService}
+          open={removeInstructor}
+          setOpen={setRemoveInstructor}
+          onClick={() =>
+            send({
+              type: 'DELETE_INSTRUCTOR',
+              value: { role: user.permission_type },
+            })
+          }
+          failure={state.matches('failure')}
+          success={state.matches('done')}
+          loading={state.matches('delete_instructor')}
+          error={state.context.error}
+          successMessage='Successully Deleted! Closing...'
+          refresh={refresh}
+        />
+      )}
+      {updateInstructor && (
+        <UpdateInstructor
+          open={updateInstructor}
+          setOpen={setUpdateInstructor}
+          user={user}
+          instructor={state.context.user}
+          refresh={refresh}
+        />
       )}
     </>
   );

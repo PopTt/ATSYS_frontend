@@ -1,7 +1,12 @@
 import { createMachine, assign, spawn } from 'xstate';
 import { defineUser } from './UserAuthorizationMachine';
 import { PermissionType } from '../models/User.js';
-import { fetchInstructors, createInstructor } from '../queries/UserQueries.js';
+import {
+  fetchInstructors,
+  createInstructor,
+  updateInstructor,
+  deleteInstructor,
+} from '../queries/UserQueries.js';
 
 export const UsersMachine = createMachine(
   {
@@ -60,7 +65,7 @@ export const UsersMachine = createMachine(
         event.data?.data?.map((user) => {
           ctx.users.push({
             ...user,
-            //ref: spawn(EventMachine(event)),
+            ref: spawn(UserMachine(user)),
           });
         });
       }),
@@ -81,11 +86,53 @@ export const UserMachine = (user) =>
         idle: {
           on: {
             CREATE_INSTRUCTOR: 'create_instructor',
+            UPDATE_INSTRUCTOR: 'update_instructor',
+            DELETE_INSTRUCTOR: 'delete_instructor',
           },
         },
         create_instructor: {
           invoke: {
             src: 'CreateInstructor',
+            onDone: {
+              target: 'done',
+            },
+            onError: {
+              target: 'failure',
+              actions: assign({
+                error: (context, event) => event.data.message,
+              }),
+            },
+          },
+          after: {
+            15000: {
+              target: 'failure',
+              actions: assign({ error: 'Request Timeout' }),
+            },
+          },
+        },
+        update_instructor: {
+          invoke: {
+            src: 'UpdateInstructor',
+            onDone: {
+              target: 'done',
+            },
+            onError: {
+              target: 'failure',
+              actions: assign({
+                error: (context, event) => event.data.message,
+              }),
+            },
+          },
+          after: {
+            15000: {
+              target: 'failure',
+              actions: assign({ error: 'Request Timeout' }),
+            },
+          },
+        },
+        delete_instructor: {
+          invoke: {
+            src: 'DeleteInstructor',
             onDone: {
               target: 'done',
             },
@@ -109,6 +156,8 @@ export const UserMachine = (user) =>
         failure: {
           on: {
             idle: 'idle',
+            UPDATE_INSTRUCTOR: 'update_instructor',
+            DELETE_INSTRUCTOR: 'delete_instructor',
           },
         },
       },
@@ -122,11 +171,15 @@ export const UserMachine = (user) =>
 
           return await createInstructor(user_with_password);
         },
-      },
-      actions: {
-        AssignEvent: assign((ctx, event) => ({
-          event: event.data.data,
-        })),
+        UpdateInstructor: async (context, event) => {
+          return await updateInstructor(event.value);
+        },
+        DeleteInstructor: async (context, event) => {
+          return await deleteInstructor({
+            user_id: context.user.user_id,
+            role: event.value.role,
+          });
+        },
       },
     }
   );

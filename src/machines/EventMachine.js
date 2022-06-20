@@ -221,6 +221,7 @@ export const EventMachine = (event) =>
         failure: {
           on: {
             idle: 'idle',
+            JOIN_EVENT: 'join_event',
           },
         },
       },
