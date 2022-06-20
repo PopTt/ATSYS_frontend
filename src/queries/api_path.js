@@ -13,6 +13,7 @@ export const delete_instructor = user_path + 'deleteInstructor';
 const event_path = backend + 'events/';
 export const add_event_instructors = event_path + 'addEventInstructors';
 export const create_event = event_path + 'create';
+export const update_event = event_path + 'update';
 export const join_event = event_path + 'join';
 export const get_event = event_path + 'getEvent';
 export const get_events = event_path + 'getEvents';

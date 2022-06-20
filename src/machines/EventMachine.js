@@ -3,6 +3,7 @@ import { Event } from '../models/Event.js';
 import {
   addEventInstructors,
   createEvent,
+  updateEvent,
   joinEvent,
   fetchEvent,
   fetchUserEvents,
@@ -125,6 +126,7 @@ export const EventMachine = (event) =>
         idle: {
           on: {
             CREATE: 'creating',
+            UPDATE: 'updating',
             GET_EVENT: 'get_event',
             GET_INVITATION_CODE: 'get_invitation_code',
             JOIN_EVENT: 'join_event',
@@ -133,6 +135,26 @@ export const EventMachine = (event) =>
         creating: {
           invoke: {
             src: 'CreateEvent',
+            onDone: {
+              target: 'done',
+            },
+            onError: {
+              target: 'failure',
+              actions: assign({
+                error: (context, event) => event.data.message,
+              }),
+            },
+          },
+          after: {
+            15000: {
+              target: 'failure',
+              actions: assign({ error: 'Request Timeout' }),
+            },
+          },
+        },
+        updating: {
+          invoke: {
+            src: 'UpdateEvent',
             onDone: {
               target: 'done',
             },
@@ -216,7 +238,9 @@ export const EventMachine = (event) =>
           type: 'final',
         },
         loaded: {
-          type: 'final',
+          on: {
+            REFRESH: 'get_event',
+          },
         },
         failure: {
           on: {
@@ -230,6 +254,9 @@ export const EventMachine = (event) =>
       services: {
         CreateEvent: async (context, event) => {
           return await createEvent(event.value);
+        },
+        UpdateEvent: async (context, event) => {
+          return await updateEvent(event.value);
         },
         GetEvent: async (context, event) => {
           return await fetchEvent(event.params['event_id']);

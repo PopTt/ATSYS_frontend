@@ -2,6 +2,7 @@ import { Get, Post } from './axios/call.js';
 import {
   add_event_instructors,
   create_event,
+  update_event,
   join_event,
   get_event,
   get_user_events,
@@ -39,6 +40,10 @@ export const fetchNotInEventInstructors = async (admin_id, event_id) => {
 
 export const createEvent = async (data) => {
   return await Post(create_event, data);
+};
+
+export const updateEvent = async (data) => {
+  return await Post(update_event, data);
 };
 
 export const joinEvent = async (data) => {

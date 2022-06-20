@@ -3,6 +3,7 @@ import { makeStyles } from '@mui/styles';
 import { AppBar, Box, Button, Toolbar, Tabs, Tab } from '@mui/material';
 import { useMachine } from '@xstate/react';
 
+import { UpdateModal } from './Update.js';
 import { InstructorGrid } from '../AdminComponent/Instructor.js';
 import { EventAttendance } from '../AttendanceComponent/EventAttendance.js';
 import { UserTable } from '../UserComponent/Table.js';
@@ -64,6 +65,7 @@ export const Event = ({ authService, user }) => {
   const global = useGlobalStyles();
 
   const [event, setEvent] = useState(undefined);
+  const [update, setUpdate] = useState(false);
   const [invite, setInvite] = useState(false);
   const [value, setValue] = React.useState(0);
 
@@ -132,7 +134,9 @@ export const Event = ({ authService, user }) => {
                 </div>
                 <div className={global.horizontal}>
                   {adminPermission && (
-                    <Button variant='contained'>Update Event</Button>
+                    <Button variant='contained' onClick={() => setUpdate(true)}>
+                      Update Event
+                    </Button>
                   )}
                   {adminInstructorPermission && (
                     <Button
@@ -194,6 +198,18 @@ export const Event = ({ authService, user }) => {
           open={invite}
           setOpen={setInvite}
           event_id={event_id}
+        />
+      )}
+      {update && (
+        <UpdateModal
+          authService={authService}
+          open={update}
+          setOpen={setUpdate}
+          user={user}
+          event={event}
+          refresh={() => {
+            send({ type: 'REFRESH', params: { event_id: event_id } });
+          }}
         />
       )}
     </>
