@@ -9,9 +9,7 @@ import { Loading } from '../LoadingComponent/CircularLoading.js';
 import { EmptyError, ServerError } from '../FailureComponent/ServerFailure.js';
 import { AttendancesMachine } from '../../machines/AttendanceMachine.js';
 import { useGlobalStyles } from '../../helpers/styles.js';
-import { SmallTitle, BigTitle, Text } from '../../frameworks/Typography.js';
-import { DefaultModal } from '../../frameworks/Modal.js';
-import { ListItem } from '../../frameworks/ListItem.js';
+import { SmallTitle } from '../../frameworks/Typography.js';
 
 const useStyles = makeStyles(() => ({
   modal: {
@@ -30,6 +28,10 @@ export const EventAttendance = ({
 }) => {
   const classes = useStyles();
   const global = useGlobalStyles();
+
+  const refresh = () => {
+    send({ type: 'REFRESH', params: { event_id: event_id } });
+  };
 
   const [create, setCreate] = useState(false);
 
@@ -63,7 +65,8 @@ export const EventAttendance = ({
               attendances={state.context.attendances}
               view={adminInstructorPermission}
               edit={adminInstructorPermission}
-              remove={adminInstructorPermission}
+              remove={adminPermission}
+              refresh={refresh}
             />
           ) : (
             <EmptyError flexCenter />

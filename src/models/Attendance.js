@@ -10,19 +10,17 @@ export class Attendance {
   constructor(
     attendance_id,
     attendance_name,
-    attendance_type,
     start_time,
     end_time,
     event_id,
-    user_id
+    creator_id
   ) {
     this.attendance_id = attendance_id;
     this.attendance_name = attendance_name;
-    this.attendance_type = attendance_type;
     this.start_time = start_time;
     this.end_time = end_time;
     this.event_id = event_id;
-    this.user_id = user_id;
+    this.creator_id = creator_id;
   }
 
   getId() {
@@ -31,10 +29,6 @@ export class Attendance {
 
   getName() {
     return this.attendance_name;
-  }
-
-  getType() {
-    return AttendanceType[this.attendance_type];
   }
 
   getStartTime() {

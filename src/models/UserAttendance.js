@@ -2,9 +2,8 @@ import { RefactorDateTime } from '../helpers/time.js';
 
 export var AttendanceStatus;
 (function (AttendanceStatus) {
-  AttendanceStatus[(AttendanceStatus['Recorded'] = 0)] = 'Recorded';
-  AttendanceStatus[(AttendanceStatus['Absent'] = 1)] = 'Absent';
-  AttendanceStatus[(AttendanceStatus['Cancelled'] = 2)] = 'Cancelled';
+  AttendanceStatus[(AttendanceStatus['Absent'] = 0)] = 'Absent';
+  AttendanceStatus[(AttendanceStatus['Attend'] = 1)] = 'Attend';
 })(AttendanceStatus || (AttendanceStatus = {}));
 
 export class UserAttendance {
@@ -31,6 +30,6 @@ export class UserAttendance {
   }
 
   getTakenTime() {
-    return RefactorDateTime(this.attendance_id);
+    return RefactorDateTime(this.attendance_time);
   }
 }

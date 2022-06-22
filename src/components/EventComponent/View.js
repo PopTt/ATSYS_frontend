@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@mui/styles';
-import { AppBar, Box, Button, Toolbar, Tabs, Tab } from '@mui/material';
+import { AppBar, Box, Button, Toolbar, Tab } from '@mui/material';
 import { useMachine } from '@xstate/react';
 
 import { UpdateModal } from './Update.js';
@@ -16,33 +16,12 @@ import {
 } from '../../machines/EventMachine.js';
 import { useGlobalStyles } from '../../helpers/styles.js';
 import * as PermissionChecker from '../../helpers/permission.js';
+import { TabsPanel, TabPanel } from '../../frameworks/Tab.js';
 import { SmallTitle, BigTitle, Text } from '../../frameworks/Typography.js';
 import { DefaultModal } from '../../frameworks/Modal.js';
 import { ListItem } from '../../frameworks/ListItem.js';
 
-function TabPanel({ children, value, index }) {
-  return (
-    <div role='tabpanel' hidden={value !== index}>
-      {value === index && (
-        <div style={{ width: '1000px', margin: '0 auto' }}>{children}</div>
-      )}
-    </div>
-  );
-}
-
 const useStyles = makeStyles(() => ({
-  iconBox: {
-    width: '40px',
-    borderRight: '1px solid #F9FAFE',
-    marginRight: '40px',
-  },
-  icon: {
-    cursor: 'pointer',
-    marginLeft: '15px',
-    fontSize: '1.7em',
-    marginTop: '10px',
-    marginLeft: '-10px',
-  },
   container: {
     width: '100%',
     marginTop: '40px',
@@ -67,7 +46,7 @@ export const Event = ({ authService, user }) => {
   const [event, setEvent] = useState(undefined);
   const [update, setUpdate] = useState(false);
   const [invite, setInvite] = useState(false);
-  const [value, setValue] = React.useState(0);
+  const [value, setValue] = useState(0);
 
   const [state, send] = useMachine(EventMachine(undefined));
 
@@ -98,8 +77,8 @@ export const Event = ({ authService, user }) => {
             sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
           >
             <Toolbar>
-              <div className={classes.iconBox}>
-                <div className={classes.icon}>
+              <div className={global.iconBox}>
+                <div className={global.icon}>
                   <ion-icon
                     name='arrow-back-outline'
                     onClick={() => window.history.back()}
@@ -150,23 +129,10 @@ export const Event = ({ authService, user }) => {
                 </div>
               </ListItem>
             </div>
-            <Box
-              sx={{
-                borderBottom: 1,
-                borderColor: 'divider',
-                width: '1000px',
-                margin: '0 auto',
-              }}
-            >
-              <Tabs
-                value={value}
-                onChange={(_, value) => setValue(value)}
-                aria-label='basic tabs example'
-              >
-                <Tab label='Attendances' />
-                {adminInstructorPermission && <Tab label='Members' />}
-              </Tabs>
-            </Box>
+            <TabsPanel value={value} setValue={setValue}>
+              <Tab label='Attendances' />
+              {adminInstructorPermission && <Tab label='Members' />}
+            </TabsPanel>
             <TabPanel value={value} index={0}>
               <EventAttendance
                 authService={authService}

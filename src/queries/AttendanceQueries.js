@@ -1,9 +1,23 @@
-import { Get, Post } from './axios/call.js';
+import { Get, Post, Delete } from './axios/call.js';
 import {
+  assign_users,
   create_attendance,
+  update_attendance,
+  update_status,
+  delete_attendance,
+  get_attendance,
+  get_qr_code,
   get_event_attendances,
   get_users_event_attendances,
 } from './api_path.js';
+
+export const fetchAttendance = async (attendance_id) => {
+  return await Get(get_attendance + '/' + attendance_id);
+};
+
+export const fetchQRCode = async (attendance_id) => {
+  return await Get(get_qr_code + '/' + attendance_id);
+};
 
 export const fetchEventAttendances = async (event_id) => {
   return await Get(get_event_attendances + '/' + event_id);
@@ -14,5 +28,21 @@ export const fetchUsersEventAttendances = async (attendance_id) => {
 };
 
 export const createAttendance = async (data) => {
-  return await Post(create_attendance, data);
+  let response = await Post(create_attendance, data);
+  return await Post(assign_users, {
+    event_id: data.event_id,
+    attendance_id: response.data.attendance_id,
+  });
+};
+
+export const updateAttendance = async (data) => {
+  return await Post(update_attendance, data);
+};
+
+export const updateStatus = async (data) => {
+  return await Post(update_status, data);
+};
+
+export const removeAttendance = async (data) => {
+  return await Delete(delete_attendance, data);
 };

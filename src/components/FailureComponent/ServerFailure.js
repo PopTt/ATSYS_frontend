@@ -8,7 +8,7 @@ import { useGlobalStyles } from '../../helpers/styles.js';
 import Empty from '../../static/img/Empty.png';
 import Error from '../../static/img/Error.png';
 
-export const EmptyError = ({ flexCenter = false }) => {
+export const EmptyError = ({ flexCenter = false, children }) => {
   const global = useGlobalStyles();
 
   return (
@@ -27,6 +27,12 @@ export const EmptyError = ({ flexCenter = false }) => {
       >
         Nothings to display...
       </Typography>
+      {children && (
+        <>
+          <br />
+          {children}
+        </>
+      )}
     </div>
   );
 };

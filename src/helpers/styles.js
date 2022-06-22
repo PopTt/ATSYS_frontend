@@ -21,4 +21,16 @@ export const useGlobalStyles = makeStyles((theme) => ({
   stayRight: {
     marginLeft: 'auto',
   },
+  iconBox: {
+    width: '40px',
+    borderRight: '1px solid #F9FAFE',
+    marginRight: '40px',
+  },
+  icon: {
+    cursor: 'pointer',
+    marginLeft: '15px',
+    fontSize: '1.7em',
+    marginTop: '10px',
+    marginLeft: '-10px',
+  },
 }));

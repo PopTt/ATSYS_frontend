@@ -14,6 +14,10 @@ export const home = '/AtHome';
 export const event = '/AtEvent';
 export const event_route = '/AtEvent/:event_id';
 
+//Attendance
+export const attendance = '/AtAttendance';
+export const attendance_route = '/AtAttendance/:attendance_id';
+
 export const GetURLSearchParams = (key) => {
   return new URLSearchParams(window.location.search).get(key);
 };

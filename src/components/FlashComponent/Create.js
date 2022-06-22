@@ -4,31 +4,27 @@ import { useMachine } from '@xstate/react';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { Alert } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
-import { string, object, date } from 'yup';
+import { string, object } from 'yup';
 
 import { ServerError } from '../FailureComponent/ServerFailure.js';
-import { AttendanceMachine } from '../../machines/AttendanceMachine.js';
-import { AttendanceType } from '../../models/Attendance.js';
-import { GetCurrentDateTime24Format } from '../../helpers/time.js';
+import { FlashMachine } from '../../machines/FlashMachine.js';
 import { DefaultModal } from '../../frameworks/Modal.js';
 import { TextBox } from '../../frameworks/Form.js';
 
 const initialValues = {
-  attendance_name: '',
-  start_time: '',
-  end_time: '',
+  flash_question: '',
+  flash_ans: '',
 };
 
-const validationAttendanceSchema = object({
-  attendance_name: string().required('Name is required'),
-  start_time: date().required('Start time is required'),
-  end_time: date().required('End time is required'),
+const validationFlashSchema = object({
+  flash_question: string().required('Question is required'),
+  flash_ans: string().required('Answer is required'),
 });
 
 const useStyles = makeStyles(() => ({
   modal: {
     width: '420px',
-    minHeight: '400px',
+    minHeight: '200px',
     padding: '32px 48px',
   },
   form: {
@@ -40,10 +36,6 @@ const useStyles = makeStyles(() => ({
     },
     '& > *': { margin: '10px 0' },
   },
-  label: {
-    marginTop: '5px',
-    marginBottom: '10px',
-  },
 }));
 
 export const CreateModal = ({
@@ -51,12 +43,12 @@ export const CreateModal = ({
   open,
   setOpen,
   user,
-  event_id,
+  attendance_id,
   refresh,
 }) => {
   const classes = useStyles();
 
-  const [state, send] = useMachine(AttendanceMachine(undefined));
+  const [state, send] = useMachine(FlashMachine);
 
   useEffect(() => {
     if (state.matches('done')) {
@@ -69,19 +61,19 @@ export const CreateModal = ({
 
   return (
     <DefaultModal
-      header='Create New Attendance'
+      header='Create New Flash Question'
       open={open}
       setOpen={setOpen}
       className={classes.modal}
     >
       <Formik
         initialValues={initialValues}
-        validationSchema={validationAttendanceSchema}
+        validationSchema={validationFlashSchema}
         onSubmit={async (values, { setSubmitting }) => {
           setSubmitting(true);
           values.role = user.permission_type;
-          values.user_id = user.getId();
-          values.event_id = event_id;
+          values.creator_id = user.getId();
+          values.attendance_id = attendance_id;
           send({ type: 'CREATE', value: values });
         }}
       >
@@ -89,7 +81,7 @@ export const CreateModal = ({
           <Form className={classes.form}>
             {state.matches('failure') && (
               <>
-                <Alert severity='error'>{state.context.error}</Alert>
+                <Alert severity='error'>{state.context.error}</Alert>{' '}
                 <ServerError
                   authService={authService}
                   error={state.context.error}
@@ -100,11 +92,10 @@ export const CreateModal = ({
             {state.matches('done') && (
               <Alert severity='success'>Successully Created.</Alert>
             )}
-            <label className={classes.label}>Name</label>
-            <Field name='attendance_name'>
+            <Field name='flash_question'>
               {({ field, meta: { touched, error, value, initialValue } }) => (
                 <TextBox
-                  variant='outlined'
+                  label='Question'
                   field={field}
                   touched={touched}
                   value={value}
@@ -113,13 +104,10 @@ export const CreateModal = ({
                 />
               )}
             </Field>
-            <label className={classes.label}>Start Time</label>
-            <Field name='start_time'>
+            <Field name='flash_ans'>
               {({ field, meta: { touched, error, value, initialValue } }) => (
                 <TextBox
-                  type='datetime-local'
-                  inputProps={{ min: GetCurrentDateTime24Format() }}
-                  variant='outlined'
+                  label='Answer'
                   field={field}
                   touched={touched}
                   value={value}
@@ -128,22 +116,7 @@ export const CreateModal = ({
                 />
               )}
             </Field>
-            <label className={classes.label}>End Time</label>
-            <Field name='end_time'>
-              {({ field, meta: { touched, error, value, initialValue } }) => (
-                <TextBox
-                  type='datetime-local'
-                  inputProps={{ min: GetCurrentDateTime24Format() }}
-                  variant='outlined'
-                  field={field}
-                  touched={touched}
-                  value={value}
-                  initialValue={initialValue}
-                  error={error}
-                />
-              )}
-            </Field>
-            <div style={{ marginTop: '48px', marginBottom: '32px' }}>
+            <div style={{ marginTop: '48px' }}>
               <LoadingButton
                 type='submit'
                 loading={state.matches('creating')}
@@ -154,6 +127,7 @@ export const CreateModal = ({
                 Create
               </LoadingButton>
             </div>
+            <br />
           </Form>
         )}
       </Formik>

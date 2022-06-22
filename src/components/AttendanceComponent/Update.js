@@ -13,22 +13,14 @@ import { GetCurrentDateTime24Format } from '../../helpers/time.js';
 import { DefaultModal } from '../../frameworks/Modal.js';
 import { TextBox } from '../../frameworks/Form.js';
 
-const initialValues = {
-  attendance_name: '',
-  start_time: '',
-  end_time: '',
-};
-
 const validationAttendanceSchema = object({
   attendance_name: string().required('Name is required'),
-  start_time: date().required('Start time is required'),
-  end_time: date().required('End time is required'),
 });
 
 const useStyles = makeStyles(() => ({
   modal: {
     width: '420px',
-    minHeight: '400px',
+    minHeight: '300px',
     padding: '32px 48px',
   },
   form: {
@@ -46,17 +38,21 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export const CreateModal = ({
+export const UpdateModal = ({
   authService,
   open,
   setOpen,
   user,
-  event_id,
+  attendance,
   refresh,
 }) => {
   const classes = useStyles();
 
-  const [state, send] = useMachine(AttendanceMachine(undefined));
+  const [state, send] = useMachine(AttendanceMachine(attendance));
+
+  const initialValues = {
+    attendance_name: attendance.attendance_name,
+  };
 
   useEffect(() => {
     if (state.matches('done')) {
@@ -69,7 +65,7 @@ export const CreateModal = ({
 
   return (
     <DefaultModal
-      header='Create New Attendance'
+      header='Update Attendance'
       open={open}
       setOpen={setOpen}
       className={classes.modal}
@@ -80,9 +76,7 @@ export const CreateModal = ({
         onSubmit={async (values, { setSubmitting }) => {
           setSubmitting(true);
           values.role = user.permission_type;
-          values.user_id = user.getId();
-          values.event_id = event_id;
-          send({ type: 'CREATE', value: values });
+          send({ type: 'UPDATE', value: values });
         }}
       >
         {() => (
@@ -98,7 +92,7 @@ export const CreateModal = ({
               </>
             )}
             {state.matches('done') && (
-              <Alert severity='success'>Successully Created.</Alert>
+              <Alert severity='success'>Successully Updated.</Alert>
             )}
             <label className={classes.label}>Name</label>
             <Field name='attendance_name'>
@@ -113,45 +107,15 @@ export const CreateModal = ({
                 />
               )}
             </Field>
-            <label className={classes.label}>Start Time</label>
-            <Field name='start_time'>
-              {({ field, meta: { touched, error, value, initialValue } }) => (
-                <TextBox
-                  type='datetime-local'
-                  inputProps={{ min: GetCurrentDateTime24Format() }}
-                  variant='outlined'
-                  field={field}
-                  touched={touched}
-                  value={value}
-                  initialValue={initialValue}
-                  error={error}
-                />
-              )}
-            </Field>
-            <label className={classes.label}>End Time</label>
-            <Field name='end_time'>
-              {({ field, meta: { touched, error, value, initialValue } }) => (
-                <TextBox
-                  type='datetime-local'
-                  inputProps={{ min: GetCurrentDateTime24Format() }}
-                  variant='outlined'
-                  field={field}
-                  touched={touched}
-                  value={value}
-                  initialValue={initialValue}
-                  error={error}
-                />
-              )}
-            </Field>
             <div style={{ marginTop: '48px', marginBottom: '32px' }}>
               <LoadingButton
                 type='submit'
-                loading={state.matches('creating')}
+                loading={state.matches('updating')}
                 variant='contained'
                 fullWidth
                 disabled={state.matches('done')}
               >
-                Create
+                Update
               </LoadingButton>
             </div>
           </Form>

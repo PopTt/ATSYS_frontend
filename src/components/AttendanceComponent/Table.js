@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useActor } from '@xstate/react';
 import {
   Paper,
   Table,
@@ -15,21 +16,17 @@ import ViewIcon from '@mui/icons-material/RemoveRedEye';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-import { ViewUsersAttendance } from './View.js';
+import { attendance as attendance_path } from '../../routes/route_paths.js';
+import { UpdateModal } from './Update.js';
 import { Loading } from '../LoadingComponent/CircularLoading.js';
 import { defineAttendance } from '../../machines/AttendanceMachine.js';
+import { ConfirmationModal } from '../../frameworks/Modal.js';
 
 const columns = [
   {
     id: 'attendance_name',
     label: 'Name',
     minWidth: 100,
-  },
-  {
-    id: 'attendance_type',
-    label: 'Attendance\u00a0Type',
-    minWidth: 100,
-    align: 'center',
   },
   {
     id: 'start_time',
@@ -50,28 +47,20 @@ const columns = [
     align: 'right',
   },
   {
-    id: 'attendance_id',
+    id: 'actions',
     label: 'Actions',
     minWidth: 170,
     align: 'center',
   },
 ];
 
-function createData(
-  attendance_name,
-  attendance_type,
-  start_time,
-  end_time,
-  status,
-  attendance_id
-) {
+function createData(attendance_name, start_time, end_time, status, ref) {
   return {
     attendance_name,
-    attendance_type,
     start_time,
     end_time,
     status,
-    attendance_id,
+    actions: ref,
   };
 }
 
@@ -82,14 +71,12 @@ export const EventAttendanceTable = ({
   view,
   edit,
   remove,
+  refresh,
 }) => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
-  const [show, setShow] = useState(false);
-  const [viewId, setViewId] = useState('');
 
   useEffect(() => {
     setLoading(true);
@@ -99,11 +86,10 @@ export const EventAttendanceTable = ({
       temp.push(
         createData(
           defined_temp.getName(),
-          defined_temp.getType(),
           defined_temp.getStartTime(),
           defined_temp.getEndTime(),
           defined_temp.getStatus(),
-          defined_temp.getId()
+          attendance.ref
         )
       );
     });
@@ -140,7 +126,7 @@ export const EventAttendanceTable = ({
                           const value = row[column.id];
                           return (
                             <>
-                              {column.id != 'attendance_id' ? (
+                              {column.id != 'actions' ? (
                                 <TableCell key={column.id} align={column.align}>
                                   {column.format && typeof value === 'number'
                                     ? column.format(value)
@@ -148,32 +134,15 @@ export const EventAttendanceTable = ({
                                 </TableCell>
                               ) : (
                                 <TableCell key={column.id} align={column.align}>
-                                  {view !== undefined && (
-                                    <Tooltip title='View Event Attendance'>
-                                      <IconButton
-                                        onClick={() => {
-                                          setShow(true);
-                                          setViewId(value);
-                                        }}
-                                      >
-                                        <ViewIcon />
-                                      </IconButton>
-                                    </Tooltip>
-                                  )}
-                                  {edit !== undefined && (
-                                    <Tooltip title='Edit'>
-                                      <IconButton>
-                                        <EditIcon />
-                                      </IconButton>
-                                    </Tooltip>
-                                  )}
-                                  {remove !== undefined && (
-                                    <Tooltip title='Delete'>
-                                      <IconButton>
-                                        <DeleteIcon />
-                                      </IconButton>
-                                    </Tooltip>
-                                  )}
+                                  <Actions
+                                    authService={authService}
+                                    user={user}
+                                    view={view}
+                                    remove={remove}
+                                    edit={edit}
+                                    action={value}
+                                    refresh={refresh}
+                                  />
                                 </TableCell>
                               )}
                             </>
@@ -191,7 +160,7 @@ export const EventAttendanceTable = ({
             count={rows.length}
             rowsPerPage={rowsPerPage}
             page={page}
-            onPageChange={(event, newPage) => {
+            onPageChange={(_, newPage) => {
               setPage(newPage);
             }}
             onRowsPerPageChange={(event) => {
@@ -203,13 +172,82 @@ export const EventAttendanceTable = ({
       ) : (
         <Loading />
       )}
-      {show != '' && (
-        <ViewUsersAttendance
-          open={show}
-          setOpen={setShow}
-          viewId={viewId}
+    </>
+  );
+};
+
+const Actions = ({
+  authService,
+  user,
+  view,
+  remove,
+  edit,
+  action,
+  refresh,
+}) => {
+  const [state, send] = useActor(action);
+
+  const [updateAttendance, setUpdateAttendance] = useState(false);
+  const [removeAttendance, setRemoveAttendance] = useState(false);
+
+  return (
+    <>
+      {view !== undefined && (
+        <Tooltip title='View Event Attendance'>
+          <IconButton
+            onClick={() =>
+              (window.location.href =
+                attendance_path + '/' + state.context.attendance.attendance_id)
+            }
+          >
+            <ViewIcon />
+          </IconButton>
+        </Tooltip>
+      )}
+      {edit !== undefined && (
+        <Tooltip title='Edit'>
+          <IconButton onClick={() => setUpdateAttendance(true)}>
+            <EditIcon />
+          </IconButton>
+        </Tooltip>
+      )}
+      {remove !== undefined && (
+        <Tooltip title='Delete'>
+          <IconButton onClick={() => setRemoveAttendance(true)}>
+            <DeleteIcon />
+          </IconButton>
+        </Tooltip>
+      )}
+      {removeAttendance && (
+        <ConfirmationModal
           authService={authService}
+          open={removeAttendance}
+          setOpen={setRemoveAttendance}
+          onClick={() =>
+            send({
+              type: 'REMOVE',
+              value: {
+                role: user.permission_type,
+                attendance_id: state.context.attendance.attendance_id,
+              },
+            })
+          }
+          failure={state.matches('failure')}
+          success={state.matches('done')}
+          loading={state.matches('removing')}
+          error={state.context.error}
+          successMessage='Successully Deleted! Closing...'
+          refresh={refresh}
+        />
+      )}
+      {updateAttendance && (
+        <UpdateModal
+          authService={authService}
+          open={updateAttendance}
+          setOpen={setUpdateAttendance}
           user={user}
+          attendance={state.context.attendance}
+          refresh={refresh}
         />
       )}
     </>

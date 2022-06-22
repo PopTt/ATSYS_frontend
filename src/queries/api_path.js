@@ -25,7 +25,17 @@ export const get_not_in_event_instructors =
 export const get_event_members = event_path + 'getEventMembers';
 
 const attendance_path = backend + 'attendances/';
+export const get_attendance = attendance_path + 'getAttendance';
+export const get_qr_code = attendance_path + 'getQRCode';
 export const get_event_attendances = attendance_path + 'getEventAttendances';
 export const get_users_event_attendances =
   attendance_path + 'getUsersEventAttendances';
+export const assign_users = attendance_path + 'assignUsers';
 export const create_attendance = attendance_path + 'create';
+export const update_attendance = attendance_path + 'updateAttendance';
+export const update_status = attendance_path + 'updateStatus';
+export const delete_attendance = attendance_path + 'deleteAttendance';
+
+export const create_flash = attendance_path + 'createFlash';
+export const update_flash = attendance_path + 'updateFlash';
+export const get_flashes = attendance_path + 'getFlash';
