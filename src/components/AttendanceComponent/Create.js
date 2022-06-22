@@ -17,12 +17,14 @@ const initialValues = {
   attendance_name: '',
   start_time: '',
   end_time: '',
+  attendance_type: AttendanceType.QRCode,
 };
 
 const validationAttendanceSchema = object({
   attendance_name: string().required('Name is required'),
   start_time: date().required('Start time is required'),
   end_time: date().required('End time is required'),
+  attendance_type: string(),
 });
 
 const useStyles = makeStyles(() => ({

@@ -19,7 +19,8 @@ export const defineAttendance = (attendance) => {
     attendance.start_time,
     attendance.end_time,
     attendance.event_id,
-    attendance.user_id
+    attendance.user_id,
+    attendance.attendance_type
   );
 };
 

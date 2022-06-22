@@ -46,6 +46,7 @@ const columns = [
     minWidth: 100,
     align: 'right',
   },
+  { id: 'type', label: 'Type', minWidth: 100, align: 'right' },
   {
     id: 'actions',
     label: 'Actions',
@@ -54,12 +55,13 @@ const columns = [
   },
 ];
 
-function createData(attendance_name, start_time, end_time, status, ref) {
+function createData(attendance_name, start_time, end_time, status, type, ref) {
   return {
     attendance_name,
     start_time,
     end_time,
     status,
+    type,
     actions: ref,
   };
 }
@@ -89,6 +91,7 @@ export const EventAttendanceTable = ({
           defined_temp.getStartTime(),
           defined_temp.getEndTime(),
           defined_temp.getStatus(),
+          defined_temp.getType(),
           attendance.ref
         )
       );

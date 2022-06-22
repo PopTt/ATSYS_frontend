@@ -130,7 +130,7 @@ const AttendanceCard = ({
     <ListItem
       style={{
         width: '800px',
-        height: '240px',
+        height: '260px',
         padding: '32px',
         margin: '0 auto',
         cursor: 'default',
@@ -142,7 +142,7 @@ const AttendanceCard = ({
             <>
               <BigTitle title={attendance.getName()} />
               <div style={{ marginBottom: '8px' }}></div>
-              <div style={{ height: '100px' }}>
+              <div style={{ height: '130px' }}>
                 <SmallTitle
                   title={'Start Time: ' + attendance.getStartTime()}
                   weight={400}
@@ -155,6 +155,11 @@ const AttendanceCard = ({
                 />
                 <SmallTitle
                   title={'Status: ' + attendance.getStatus()}
+                  weight={400}
+                  size={18}
+                />
+                <SmallTitle
+                  title={'Type: ' + attendance.getType()}
                   weight={400}
                   size={18}
                 />

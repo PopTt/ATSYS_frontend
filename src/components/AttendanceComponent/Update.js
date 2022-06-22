@@ -2,9 +2,9 @@ import React, { useEffect } from 'react';
 import { makeStyles } from '@mui/styles';
 import { useMachine } from '@xstate/react';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Alert } from '@mui/material';
+import { Alert, Select, MenuItem } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
-import { string, object, date } from 'yup';
+import { string, object } from 'yup';
 
 import { ServerError } from '../FailureComponent/ServerFailure.js';
 import { AttendanceMachine } from '../../machines/AttendanceMachine.js';
@@ -15,6 +15,7 @@ import { TextBox } from '../../frameworks/Form.js';
 
 const validationAttendanceSchema = object({
   attendance_name: string().required('Name is required'),
+  attendance_type: string(),
 });
 
 const useStyles = makeStyles(() => ({
@@ -52,6 +53,7 @@ export const UpdateModal = ({
 
   const initialValues = {
     attendance_name: attendance.attendance_name,
+    attendance_type: attendance.attendance_type,
   };
 
   useEffect(() => {
@@ -79,7 +81,7 @@ export const UpdateModal = ({
           send({ type: 'UPDATE', value: values });
         }}
       >
-        {() => (
+        {({ setFieldValue }) => (
           <Form className={classes.form}>
             {state.matches('failure') && (
               <>
@@ -105,6 +107,22 @@ export const UpdateModal = ({
                   initialValue={initialValue}
                   error={error}
                 />
+              )}
+            </Field>
+            <label className={classes.label}>Attendance Type</label>
+            <br />
+            <Field name='attendance_type'>
+              {({ field, meta: { touched, error, value, initialValue } }) => (
+                <Select
+                  defaultValue={attendance.attendance_type}
+                  onChange={(event) =>
+                    setFieldValue('attendance_type', event.target.value)
+                  }
+                  fullWidth
+                >
+                  <MenuItem value={'0'}>QR Code</MenuItem>
+                  <MenuItem value={'1'}>Flash</MenuItem>
+                </Select>
               )}
             </Field>
             <div style={{ marginTop: '48px', marginBottom: '32px' }}>

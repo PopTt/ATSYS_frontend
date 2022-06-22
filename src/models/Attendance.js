@@ -3,7 +3,7 @@ import { RefactorDateTime } from '../helpers/time.js';
 export var AttendanceType;
 (function (AttendanceType) {
   AttendanceType[(AttendanceType['QRCode'] = 0)] = 'QRCode';
-  AttendanceType[(AttendanceType['Quiz'] = 1)] = 'Quiz';
+  AttendanceType[(AttendanceType['Flash'] = 1)] = 'Flash';
 })(AttendanceType || (AttendanceType = {}));
 
 export class Attendance {
@@ -13,7 +13,8 @@ export class Attendance {
     start_time,
     end_time,
     event_id,
-    creator_id
+    creator_id,
+    attendance_type
   ) {
     this.attendance_id = attendance_id;
     this.attendance_name = attendance_name;
@@ -21,6 +22,7 @@ export class Attendance {
     this.end_time = end_time;
     this.event_id = event_id;
     this.creator_id = creator_id;
+    this.attendance_type = attendance_type;
   }
 
   getId() {
@@ -43,5 +45,9 @@ export class Attendance {
     if (this.start_time < new Date() && this.end_time > new Date())
       return 'Active';
     else return 'Inactive';
+  }
+
+  getType() {
+    return AttendanceType[this.attendance_type];
   }
 }
