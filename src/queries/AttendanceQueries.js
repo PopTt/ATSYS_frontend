@@ -31,7 +31,7 @@ export const createAttendance = async (data) => {
   let response = await Post(create_attendance, data);
   return await Post(assign_users, {
     event_id: data.event_id,
-    attendance_id: response.data.attendance_id,
+    attendance_id: response.data.insertId,
   });
 };
 
