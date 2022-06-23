@@ -90,7 +90,7 @@ export const EventAttendanceTable = ({
           defined_temp.getName(),
           defined_temp.getStartTime(),
           defined_temp.getEndTime(),
-          defined_temp.getStatus(),
+          attendance.status,
           defined_temp.getType(),
           attendance.ref
         )
