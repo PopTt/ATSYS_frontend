@@ -210,7 +210,7 @@ export const UpdateInstructor = ({
 };
 
 const columns = [
-  { field: 'id', headerName: 'User Id', width: 70 },
+  { field: 'id', headerName: 'User Id', width: 70, hide: true },
   { field: 'first_name', headerName: 'First name', width: 130 },
   { field: 'last_name', headerName: 'Last name', width: 130 },
   {
