@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { LinearProgress } from '@mui/material';
 import { useMachine } from '@xstate/react';
 
@@ -66,7 +66,15 @@ const AttendanceRecordsGrid = ({ user, userAttendances }) => {
   const [_, send] = useMachine(UserAttendanceMachine);
 
   const columns = [
-    { field: 'id', headerName: 'Id', width: 70, hide: true },
+    {
+      field: 'id',
+      headerName: 'Id',
+      width: 70,
+      hide: true,
+      disableExport: true,
+      hideable: false,
+      filterable: false,
+    },
     { field: 'first_name', headerName: 'First name', width: 130 },
     { field: 'last_name', headerName: 'Last name', width: 130 },
     { field: 'email', headerName: 'Email', width: 160 },
@@ -130,6 +138,7 @@ const AttendanceRecordsGrid = ({ user, userAttendances }) => {
         loading={loading}
         components={{
           LoadingOverlay: LinearProgress,
+          Toolbar: GridToolbar,
         }}
       />
     </div>
