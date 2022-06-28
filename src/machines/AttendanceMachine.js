@@ -30,7 +30,9 @@ export const defineUserAttendance = (userAttendance) => {
     userAttendance.user_id,
     userAttendance.attendance_id,
     userAttendance.attendance_status,
-    userAttendance.attendance_time
+    userAttendance.attendance_time,
+    userAttendance.flash_result,
+    userAttendance.location
   );
 };
 

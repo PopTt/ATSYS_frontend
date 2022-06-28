@@ -44,18 +44,26 @@ export const AttendanceRecords = ({
               userAttendances={state.context.userAttendances}
             />
           ) : (
-            <EmptyError flexCenter />
+            <div style={{ marginTop: '20px' }}>
+              <EmptyError flexCenter />
+            </div>
           )}
         </div>
       )}
       {state.matches('failure') && (
-        <ServerError
-          authService={authService}
-          error={state.context.error}
-          flexCenter
-        />
+        <div style={{ marginTop: '20px' }}>
+          <ServerError
+            authService={authService}
+            error={state.context.error}
+            flexCenter
+          />
+        </div>
       )}
-      {state.matches('get_users_event_attendances') && <Loading flexCenter />}
+      {state.matches('get_users_event_attendances') && (
+        <div style={{ marginTop: '20px' }}>
+          <Loading flexCenter />
+        </div>
+      )}
     </div>
   );
 };
@@ -78,6 +86,11 @@ const AttendanceRecordsGrid = ({ user, userAttendances }) => {
     { field: 'first_name', headerName: 'First name', width: 130 },
     { field: 'last_name', headerName: 'Last name', width: 130 },
     { field: 'email', headerName: 'Email', width: 160 },
+    {
+      field: 'type',
+      headerName: 'Recorded Type',
+      width: 160,
+    },
     {
       field: 'status',
       headerName: 'Status',
@@ -105,6 +118,16 @@ const AttendanceRecordsGrid = ({ user, userAttendances }) => {
       headerName: 'Recorded Time',
       width: 160,
     },
+    {
+      field: 'flash_result',
+      headerName: 'Flash Result',
+      width: 120,
+    },
+    {
+      field: 'location',
+      headerName: 'Recorded Location',
+      width: 200,
+    },
   ];
 
   useEffect(() => {
@@ -117,8 +140,11 @@ const AttendanceRecordsGrid = ({ user, userAttendances }) => {
         first_name: userAttendance.first_name,
         last_name: userAttendance.last_name,
         email: userAttendance.email,
+        type: temp_ua.getTakenType(),
         status: temp_ua.getStatus(),
         time: temp_ua.getTakenTime(),
+        flash_result: temp_ua.getFlashResult(),
+        location: temp_ua.getLocation(),
       });
     });
     setRows(temp);
