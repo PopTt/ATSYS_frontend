@@ -67,16 +67,18 @@ export const Login = ({ authService }) => {
   const classes = useStyles();
 
   const [isExpire, setIsExpire] = useState(false);
+  const [isLogout, setIsLogout] = useState(false);
   const [state, send] = useActor(authService);
 
   useEffect(() => {
     if (state.matches('expire')) setIsExpire(true);
+    if (state.matches('logout')) setIsLogout(true);
     send({ type: 'UNAUTHORIZED' });
   }, []);
 
   useEffect(() => {
     if (state.matches('authorized')) {
-      window.location.href = home;
+      window.location.replace(home);
     }
   }, [state]);
 
@@ -101,6 +103,11 @@ export const Login = ({ authService }) => {
             {isExpire && (
               <Alert severity='error'>
                 Session Expired. Please login again.
+              </Alert>
+            )}
+            {isLogout && (
+              <Alert severity='success'>
+                You have been successfully logged out.
               </Alert>
             )}
             <Field name='email'>

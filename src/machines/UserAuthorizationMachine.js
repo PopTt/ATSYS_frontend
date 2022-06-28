@@ -117,7 +117,6 @@ export const UserAuthorizationMachine = createMachine(
       },
       Logout: async (context, event) => {
         await logout();
-        localStorage.setItem(USER_AUTH_TOKEN, '');
       },
     },
     actions: {

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { useActor } from '@xstate/react';
 import {
   Box,
+  Button,
   Drawer,
   AppBar,
   Toolbar,
@@ -14,6 +16,7 @@ import {
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import EventIcon from '@mui/icons-material/Event';
 import AccountIcon from '@mui/icons-material/AccountCircle';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 import { UserEvent } from '../EventComponent/index.js';
 import { InstructorManagement } from '../AdminComponent/Instructor.js';
@@ -99,9 +102,20 @@ export const Home = ({ authService, user }) => {
 };
 
 const Dashboard = ({ authService, user }) => {
+  const [_, send] = useActor(authService);
+
   return (
     <div>
       <BigTitle title={`Welcome Back, ${user.getFullName()}`} />
+      <br />
+      <Button
+        variant='contained'
+        onClick={() => {
+          send({ type: 'LOGOUT' });
+        }}
+      >
+        Logout
+      </Button>
     </div>
   );
 };

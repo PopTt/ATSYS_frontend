@@ -37,4 +37,5 @@ export const register = async (user) => {
 
 export const logout = async () => {
   await httpClient.post(logout_path);
+  localStorage.removeItem(ACCESS_TOKEN);
 };
