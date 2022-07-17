@@ -7,6 +7,7 @@ import {
   delete_attendance,
   get_attendance,
   get_qr_code,
+  get_user_attendance_histories,
   get_event_attendances,
   get_users_event_attendances,
 } from './api_path.js';
@@ -17,6 +18,12 @@ export const fetchAttendance = async (attendance_id) => {
 
 export const fetchQRCode = async (attendance_id) => {
   return await Get(get_qr_code + '/' + attendance_id);
+};
+
+export const fetchUserHistory = async (user_id, event_id) => {
+  return await Get(
+    get_user_attendance_histories + '/' + user_id + '/' + event_id
+  );
 };
 
 export const fetchEventAttendances = async (event_id) => {

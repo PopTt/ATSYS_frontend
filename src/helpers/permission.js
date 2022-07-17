@@ -13,3 +13,13 @@ export const AdminInstructorLevelPermission = (permission_type) => {
     return true;
   return false;
 };
+
+export const InstructorLevelPermission = (permission_type) => {
+  if (permission_type == PermissionType.Instructor) return true;
+  return false;
+};
+
+export const StudentLevelPermission = (permission_type) => {
+  if (permission_type == PermissionType.Student) return true;
+  return false;
+};

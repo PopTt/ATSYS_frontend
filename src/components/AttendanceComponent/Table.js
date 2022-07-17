@@ -195,7 +195,7 @@ const Actions = ({
 
   return (
     <>
-      {view !== undefined && (
+      {view && (
         <Tooltip title='View Event Attendance'>
           <IconButton
             onClick={() =>
@@ -207,14 +207,14 @@ const Actions = ({
           </IconButton>
         </Tooltip>
       )}
-      {edit !== undefined && (
+      {edit && (
         <Tooltip title='Edit'>
           <IconButton onClick={() => setUpdateAttendance(true)}>
             <EditIcon />
           </IconButton>
         </Tooltip>
       )}
-      {remove !== undefined && (
+      {remove && (
         <Tooltip title='Delete'>
           <IconButton onClick={() => setRemoveAttendance(true)}>
             <DeleteIcon />

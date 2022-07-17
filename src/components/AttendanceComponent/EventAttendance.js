@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { makeStyles } from '@mui/styles';
 import { Button } from '@mui/material';
 import { useMachine } from '@xstate/react';
 
@@ -11,22 +10,13 @@ import { AttendancesMachine } from '../../machines/AttendanceMachine.js';
 import { useGlobalStyles } from '../../helpers/styles.js';
 import { SmallTitle } from '../../frameworks/Typography.js';
 
-const useStyles = makeStyles(() => ({
-  modal: {
-    width: '660px',
-    minHeight: '650px',
-    padding: '32px 48px',
-  },
-}));
-
 export const EventAttendance = ({
   authService,
   user,
   event_id,
-  adminPermission,
   adminInstructorPermission,
+  instructorLevelPermission,
 }) => {
-  const classes = useStyles();
   const global = useGlobalStyles();
 
   const refresh = () => {
@@ -46,7 +36,7 @@ export const EventAttendance = ({
       <br />
       <div className={global.horizontal} style={{ marginBottom: '10px' }}>
         <SmallTitle title='Attendance List' weight={500} size={16} />
-        {state.matches('loaded') && adminInstructorPermission && (
+        {state.matches('loaded') && instructorLevelPermission && (
           <Button
             variant='contained'
             style={{ marginLeft: 'auto' }}
@@ -64,8 +54,8 @@ export const EventAttendance = ({
               user={user}
               attendances={state.context.attendances}
               view={adminInstructorPermission}
-              edit={adminInstructorPermission}
-              remove={adminPermission}
+              edit={instructorLevelPermission}
+              remove={instructorLevelPermission}
               refresh={refresh}
             />
           ) : (

@@ -16,7 +16,6 @@ import {
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import EventIcon from '@mui/icons-material/Event';
 import AccountIcon from '@mui/icons-material/AccountCircle';
-import LogoutIcon from '@mui/icons-material/Logout';
 
 import { UserEvent } from '../EventComponent/index.js';
 import { InstructorManagement } from '../AdminComponent/Instructor.js';
@@ -30,6 +29,10 @@ export const Home = ({ authService, user }) => {
   const [currentSection, setCurrentSection] = useState(0);
 
   const adminPermission = PermissionChecker.AdminLevelPermission(
+    user.permission_type
+  );
+
+  const studentPermission = PermissionChecker.StudentLevelPermission(
     user.permission_type
   );
 
@@ -87,6 +90,7 @@ export const Home = ({ authService, user }) => {
             authService={authService}
             user={user}
             adminPermission={adminPermission}
+            studentPermission={studentPermission}
           />
         )}
         {adminPermission && currentSection == 2 && (

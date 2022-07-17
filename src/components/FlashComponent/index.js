@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { makeStyles } from '@mui/styles';
 import { useMachine } from '@xstate/react';
 import { Button } from '@mui/material';
 
@@ -15,7 +14,7 @@ import { ListItem } from '../../frameworks/ListItem.js';
 export const Flash = ({
   authService,
   user,
-  adminInstructorPermission,
+  instructorLevelPermission,
   attendance_id,
 }) => {
   const global = useGlobalStyles();
@@ -53,7 +52,7 @@ export const Flash = ({
           <br />
           <div className={global.horizontal}>
             <SmallTitle title='Flash Question' />
-            {state.matches('loaded') && (
+            {state.matches('loaded') && instructorLevelPermission && (
               <Button
                 variant='contained'
                 onClick={() => setCreate(true)}
@@ -89,7 +88,7 @@ export const Flash = ({
                         />
                       </div>
                       <div style={{ marginBottom: '8px' }}></div>
-                      {adminInstructorPermission && (
+                      {instructorLevelPermission && (
                         <div className={global.horizontal}>
                           <Button
                             variant='contained'

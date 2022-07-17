@@ -19,6 +19,7 @@ export const defineEvent = (event) => {
     event.event_id,
     event.event_name,
     event.event_description,
+    event.event_type,
     event.established_time,
     event.invitation_code,
     event.admin_id
@@ -80,7 +81,8 @@ export const EventsMachine = createMachine(
       },
       loaded: {
         on: {
-          REFRESH: 'get_events',
+          GET_EVENTS: 'get_events',
+          GET_USER_EVENTS: 'get_user_events',
         },
       },
       failure: {

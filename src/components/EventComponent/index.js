@@ -9,6 +9,7 @@ import { Loading } from '../LoadingComponent/CircularLoading.js';
 import { EmptyError, ServerError } from '../FailureComponent/ServerFailure.js';
 import { EventsMachine } from '../../machines/EventMachine.js';
 import { event as event_path } from '../../routes/route_paths.js';
+import { EventType } from '../../models/Event.js';
 import { useGlobalStyles } from '../../helpers/styles.js';
 import { ListItem } from '../../frameworks/ListItem.js';
 import { SmallTitle, BigTitle, Text } from '../../frameworks/Typography.js';
@@ -28,7 +29,12 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export const UserEvent = ({ authService, user, adminPermission }) => {
+export const UserEvent = ({
+  authService,
+  user,
+  adminPermission,
+  studentPermission,
+}) => {
   const classes = useStyles();
   const global = useGlobalStyles();
 
@@ -49,11 +55,12 @@ export const UserEvent = ({ authService, user, adminPermission }) => {
         <BigTitle title='Your Events' />
         {state.matches('loaded') && (
           <div style={{ marginLeft: '32px' }}>
-            {adminPermission ? (
+            {adminPermission && (
               <Button variant='contained' onClick={() => setCreate(true)}>
                 Create Event
               </Button>
-            ) : (
+            )}
+            {studentPermission && (
               <Button variant='contained' onClick={() => setJoin(true)}>
                 Join Event
               </Button>
@@ -67,7 +74,13 @@ export const UserEvent = ({ authService, user, adminPermission }) => {
             <div>
               {state.context.events.map((event) => (
                 <ListItem className={classes.item} key={event.event_id}>
-                  <SmallTitle title={event.event_name} weight='600' />
+                  <SmallTitle title={event.event_name} weight={600} />
+                  <SmallTitle
+                    title={'Type: ' + EventType[event.event_type]}
+                    weight={500}
+                    size={16}
+                  />
+                  <div style={{ marginTop: '4px' }}></div>
                   <div style={{ height: '120px' }}>
                     <Text
                       text={
@@ -108,7 +121,10 @@ export const UserEvent = ({ authService, user, adminPermission }) => {
           setOpen={setJoin}
           user={user}
           refresh={() => {
-            send({ type: 'GET_EVENTS', params: { user_id: user.getId() } });
+            send({
+              type: 'GET_USER_EVENTS',
+              params: { user_id: user.getId() },
+            });
           }}
         />
       )}
@@ -119,7 +135,7 @@ export const UserEvent = ({ authService, user, adminPermission }) => {
           setOpen={setCreate}
           user={user}
           refresh={() => {
-            send({ type: 'GET_EVENTS', params: { user_id: user.getId() } });
+            send({ type: 'GET_EVENTS', params: { admin_id: user.getId() } });
           }}
         />
       )}

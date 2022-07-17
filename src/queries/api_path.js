@@ -30,6 +30,8 @@ export const get_qr_code = attendance_path + 'getQRCode';
 export const get_event_attendances = attendance_path + 'getEventAttendances';
 export const get_users_event_attendances =
   attendance_path + 'getUsersEventAttendances';
+export const get_user_attendance_histories =
+  attendance_path + 'getUserAttendanceHistories';
 export const assign_users = attendance_path + 'assignUsers';
 export const create_attendance = attendance_path + 'create';
 export const update_attendance = attendance_path + 'updateAttendance';

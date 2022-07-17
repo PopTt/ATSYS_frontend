@@ -16,7 +16,7 @@ import { SmallTitle } from '../../frameworks/Typography.js';
 export const AttendanceRecords = ({
   authService,
   user,
-  adminInstructorPermission,
+  instructorLevelPermission,
   attendance_id,
 }) => {
   const [state, send] = useMachine(AttendancesMachine);
@@ -42,6 +42,7 @@ export const AttendanceRecords = ({
             <AttendanceRecordsGrid
               user={user}
               userAttendances={state.context.userAttendances}
+              instructorLevelPermission={instructorLevelPermission}
             />
           ) : (
             <div style={{ marginTop: '20px' }}>
@@ -68,7 +69,11 @@ export const AttendanceRecords = ({
   );
 };
 
-const AttendanceRecordsGrid = ({ user, userAttendances }) => {
+const AttendanceRecordsGrid = ({
+  user,
+  userAttendances,
+  instructorLevelPermission,
+}) => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [_, send] = useMachine(UserAttendanceMachine);
@@ -96,7 +101,7 @@ const AttendanceRecordsGrid = ({ user, userAttendances }) => {
       headerName: 'Status',
       type: 'singleSelect',
       width: 160,
-      editable: true,
+      editable: instructorLevelPermission,
       valueOptions: () => {
         return [AttendanceStatus[0], AttendanceStatus[1]];
       },

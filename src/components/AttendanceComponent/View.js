@@ -39,8 +39,9 @@ export const Attendance = ({ authService, user }) => {
 
   const attendance_id = window.location.pathname.split('/')[2];
 
-  const adminInstructorPermission =
-    PermissionChecker.AdminInstructorLevelPermission(user.permission_type);
+  const instructorLevelPermission = PermissionChecker.InstructorLevelPermission(
+    user.permission_type
+  );
 
   return (
     <Box sx={{ minHeight: '100vh', width: '100%' }}>
@@ -66,17 +67,17 @@ export const Attendance = ({ authService, user }) => {
           authService={authService}
           user={user}
           attendance_id={attendance_id}
-          adminInstructorPermission={adminInstructorPermission}
+          instructorLevelPermission={instructorLevelPermission}
         />
         <TabsPanel value={value} setValue={setValue} width='800px'>
           <Tab label='Attendances' />
-          {adminInstructorPermission && <Tab label='Flash' />}
+          <Tab label='Flash' />
         </TabsPanel>
         <TabPanel value={value} index={0}>
           <AttendanceRecords
             authService={authService}
             user={user}
-            adminInstructorPermission={adminInstructorPermission}
+            instructorLevelPermission={instructorLevelPermission}
             attendance_id={attendance_id}
           />
         </TabPanel>
@@ -84,7 +85,7 @@ export const Attendance = ({ authService, user }) => {
           <Flash
             authService={authService}
             user={user}
-            adminInstructorPermission={adminInstructorPermission}
+            instructorLevelPermission={instructorLevelPermission}
             attendance_id={attendance_id}
           />
         </TabPanel>
@@ -97,7 +98,7 @@ const AttendanceCard = ({
   authService,
   user,
   attendance_id,
-  adminInstructorPermission,
+  instructorLevelPermission,
 }) => {
   const [attendance, setAttendance] = useState();
 
@@ -130,7 +131,7 @@ const AttendanceCard = ({
     <ListItem
       style={{
         width: '800px',
-        height: '260px',
+        height: instructorLevelPermission ? '260px' : '210px',
         padding: '32px',
         margin: '0 auto',
         cursor: 'default',
@@ -164,7 +165,7 @@ const AttendanceCard = ({
                   size={18}
                 />
               </div>
-              {adminInstructorPermission && (
+              {instructorLevelPermission && (
                 <div className={global.horizontal}>
                   <Button variant='contained' onClick={() => setUpdate(true)}>
                     Update Attendance

@@ -9,7 +9,7 @@ export var PermissionType;
 (function (PermissionType) {
   PermissionType[(PermissionType['Admin'] = 0)] = 'Admin';
   PermissionType[(PermissionType['Instructor'] = 1)] = 'Instructor';
-  PermissionType[(PermissionType['User'] = 2)] = 'User';
+  PermissionType[(PermissionType['Student'] = 2)] = 'Student';
 })(PermissionType || (PermissionType = {}));
 
 export class User {

@@ -6,6 +6,7 @@ import { useMachine } from '@xstate/react';
 import { UpdateModal } from './Update.js';
 import { InstructorGrid } from '../AdminComponent/Instructor.js';
 import { EventAttendance } from '../AttendanceComponent/EventAttendance.js';
+import { UserAttendanceHistory } from '../AttendanceComponent/History.js';
 import { UserTable } from '../UserComponent/Table.js';
 import { Loading } from '../LoadingComponent/CircularLoading.js';
 import { EmptyError, ServerError } from '../FailureComponent/ServerFailure.js';
@@ -59,6 +60,10 @@ export const Event = ({ authService, user }) => {
   const adminInstructorPermission =
     PermissionChecker.AdminInstructorLevelPermission(user.permission_type);
 
+  const instructorLevelPermission = PermissionChecker.InstructorLevelPermission(
+    user.permission_type
+  );
+
   useEffect(() => {
     send({ type: 'GET_EVENT', params: { event_id: event_id } });
   }, []);
@@ -94,13 +99,22 @@ export const Event = ({ authService, user }) => {
               <ListItem
                 style={{
                   width: '1000px',
-                  height: '290px',
+                  height:
+                    adminPermission || adminInstructorPermission
+                      ? '330px'
+                      : '240px',
                   padding: '32px',
                   margin: '0 auto',
                   cursor: 'default',
                 }}
               >
                 <BigTitle title={event.getEventName()} />
+                <div style={{ marginBottom: '4px' }}></div>
+                <SmallTitle
+                  title={'Type: ' + event.getEventType()}
+                  size={16}
+                  weight={500}
+                />
                 <div style={{ marginBottom: '4px' }}></div>
                 <div style={{ height: '160px' }}>
                   {event.getEventDescription() !== '' ? (
@@ -134,13 +148,21 @@ export const Event = ({ authService, user }) => {
               {adminInstructorPermission && <Tab label='Members' />}
             </TabsPanel>
             <TabPanel value={value} index={0}>
-              <EventAttendance
-                authService={authService}
-                user={user}
-                event_id={event_id}
-                adminPermission={adminPermission}
-                adminInstructorPermission={adminInstructorPermission}
-              />
+              {adminInstructorPermission ? (
+                <EventAttendance
+                  authService={authService}
+                  user={user}
+                  event_id={event_id}
+                  adminInstructorPermission={adminInstructorPermission}
+                  instructorLevelPermission={instructorLevelPermission}
+                />
+              ) : (
+                <UserAttendanceHistory
+                  authService={authService}
+                  user={user}
+                  event_id={event_id}
+                />
+              )}
             </TabPanel>
             <TabPanel value={value} index={1}>
               <Members
@@ -148,7 +170,6 @@ export const Event = ({ authService, user }) => {
                 user={user}
                 event_id={event_id}
                 adminPermission={adminPermission}
-                adminInstructorPermission={adminInstructorPermission}
               />
             </TabPanel>
           </Box>
@@ -251,13 +272,7 @@ const InviteModal = ({ authService, open, setOpen, event_id }) => {
   );
 };
 
-const Members = ({
-  authService,
-  user,
-  event_id,
-  adminPermission,
-  adminInstructorPermission,
-}) => {
+const Members = ({ authService, user, event_id, adminPermission }) => {
   const global = useGlobalStyles();
 
   const [add, setAdd] = useState(false);
@@ -295,7 +310,7 @@ const Members = ({
                 authService={authService}
                 user={user}
                 users={state.context.members}
-                remove={true}
+                remove={adminPermission}
                 removeParams={{
                   role: user.permission_type,
                   event_id: event_id,

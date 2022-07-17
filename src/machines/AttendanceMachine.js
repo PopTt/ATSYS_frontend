@@ -7,6 +7,7 @@ import {
   updateStatus,
   removeAttendance,
   fetchAttendance,
+  fetchUserHistory,
   fetchQRCode,
   fetchEventAttendances,
   fetchUsersEventAttendances,
@@ -48,8 +49,22 @@ export const AttendancesMachine = createMachine(
     states: {
       idle: {
         on: {
+          GET_USER_HISTORY: 'get_user_history',
           GET_EVENT_ATTENDANCES: 'get_event_attendances',
           GET_USERS_EVENT_ATTENDANCES: 'get_users_event_attendances',
+        },
+      },
+      get_user_history: {
+        invoke: {
+          src: 'GetUserHistory',
+          onDone: {
+            target: 'loaded',
+            actions: 'AssignUserAttendances',
+          },
+          onError: {
+            target: 'failure',
+            actions: assign({ error: (context, event) => event.data.message }),
+          },
         },
       },
       get_event_attendances: {
@@ -105,6 +120,12 @@ export const AttendancesMachine = createMachine(
   },
   {
     services: {
+      GetUserHistory: async (context, event) => {
+        return await fetchUserHistory(
+          event.params['user_id'],
+          event.params['event_id']
+        );
+      },
       GetEventAttendances: async (context, event) => {
         return await fetchEventAttendances(event.params['event_id']);
       },

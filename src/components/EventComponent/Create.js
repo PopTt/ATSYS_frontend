@@ -1,13 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@mui/styles';
 import { useMachine } from '@xstate/react';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Alert } from '@mui/material';
+import { Alert, Select, MenuItem, InputLabel } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
 import { string, object } from 'yup';
 
 import { ServerError } from '../FailureComponent/ServerFailure.js';
 import { EventMachine } from '../../machines/EventMachine.js';
+import { EventType } from '../../models/Event.js';
 import { DefaultModal } from '../../frameworks/Modal.js';
 import { TextBox } from '../../frameworks/Form.js';
 
@@ -41,6 +42,8 @@ const useStyles = makeStyles(() => ({
 export const CreateModal = ({ authService, open, setOpen, user, refresh }) => {
   const classes = useStyles();
 
+  const [eventType, setEventType] = useState(0);
+
   const [state, send] = useMachine(EventMachine(undefined));
 
   useEffect(() => {
@@ -64,6 +67,7 @@ export const CreateModal = ({ authService, open, setOpen, user, refresh }) => {
         validationSchema={validationEventSchema}
         onSubmit={async (values, { setSubmitting }) => {
           setSubmitting(true);
+          values.event_type = eventType;
           values.role = user.permission_type;
           values.admin_id = user.getId();
           send({ type: 'CREATE', value: values });
@@ -109,6 +113,18 @@ export const CreateModal = ({ authService, open, setOpen, user, refresh }) => {
                 />
               )}
             </Field>
+            <div style={{ marginTop: '30px' }}></div>
+            <InputLabel>Type</InputLabel>
+            <Select
+              value={eventType}
+              onChange={(event) => setEventType(event.target.value)}
+              variant='standard'
+              sx={{ width: '100%' }}
+            >
+              <MenuItem value={0}>{EventType[0]}</MenuItem>
+              <MenuItem value={1}>{EventType[1]}</MenuItem>
+              <MenuItem value={2}>{EventType[2]}</MenuItem>
+            </Select>
             <div style={{ marginTop: '48px', marginBottom: '32px' }}>
               <LoadingButton
                 type='submit'

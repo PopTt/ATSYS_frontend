@@ -185,7 +185,7 @@ const Actions = ({
           </IconButton>
         </Tooltip>
       )}
-      {remove !== undefined && (
+      {remove && (
         <Tooltip title='Delete'>
           <IconButton onClick={() => setRemoveInstructor(true)}>
             <DeleteIcon />
