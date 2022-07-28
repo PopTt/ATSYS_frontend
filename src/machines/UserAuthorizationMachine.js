@@ -109,7 +109,7 @@ export const UserAuthorizationMachine = createMachine(
         return await login(event.value);
       },
       Register: async (context, event) => {
-        let new_user = defineUser(event.value, PermissionType.User);
+        let new_user = defineUser(event.value, PermissionType.Student);
         let password = { password: event.value.password };
         let user_with_password = Object.assign(new_user, password);
 
