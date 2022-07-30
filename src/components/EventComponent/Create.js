@@ -57,7 +57,7 @@ export const CreateModal = ({ authService, open, setOpen, user, refresh }) => {
 
   return (
     <DefaultModal
-      header='Create New Event'
+      header='Create New Class'
       open={open}
       setOpen={setOpen}
       className={classes.modal}

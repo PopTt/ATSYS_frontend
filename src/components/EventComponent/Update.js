@@ -64,7 +64,7 @@ export const UpdateModal = ({
 
   return (
     <DefaultModal
-      header='Update Event'
+      header='Update Class'
       open={open}
       setOpen={setOpen}
       className={classes.modal}

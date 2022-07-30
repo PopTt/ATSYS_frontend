@@ -90,7 +90,7 @@ export const Event = ({ authService, user }) => {
                   ></ion-icon>
                 </div>
               </div>
-              <BigTitle title='AtEvent Management' weight='500' />
+              <BigTitle title='AtClass Management' weight='500' />
             </Toolbar>
           </AppBar>
           <Box component='main' className={classes.container}>
@@ -128,7 +128,7 @@ export const Event = ({ authService, user }) => {
                 <div className={global.horizontal}>
                   {adminPermission && (
                     <Button variant='contained' onClick={() => setUpdate(true)}>
-                      Update Event
+                      Update Class
                     </Button>
                   )}
                   {adminInstructorPermission && (
@@ -223,10 +223,10 @@ const InviteModal = ({ authService, open, setOpen, event_id }) => {
       onClose={() => setOpen(false)}
       className={classes.dialog}
     >
-      <BigTitle title='Event Invitation' />
+      <BigTitle title='Class Invitation' />
       {state.matches('loaded') && (
         <div style={{ marginTop: '12px' }}>
-          <Text text='Copy the invitation code below and send it to your students or instructors to join this event.' />
+          <Text text='Copy the invitation code below and send it to your students or instructors to join this class.' />
           <input
             style={{
               marginTop: '10px',
@@ -291,7 +291,7 @@ const Members = ({ authService, user, event_id, adminPermission }) => {
     <div>
       <br />
       <div className={global.horizontal} style={{ marginBottom: '10px' }}>
-        <SmallTitle title='Event Member List' weight={500} size={16} />
+        <SmallTitle title='Class Member List' weight={500} size={16} />
         {state.matches('loaded') && adminPermission && (
           <Button
             variant='contained'

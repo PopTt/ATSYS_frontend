@@ -37,7 +37,7 @@ export const JoinModal = ({ authService, open, setOpen, user, refresh }) => {
 
   return (
     <DefaultModal
-      header='Join Event'
+      header='Join Class'
       open={open}
       setOpen={setOpen}
       className={classes.modal}

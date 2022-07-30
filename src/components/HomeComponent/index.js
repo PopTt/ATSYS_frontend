@@ -14,7 +14,7 @@ import {
   ListItemText,
 } from '@mui/material';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import EventIcon from '@mui/icons-material/Event';
+import ClassIcon from '@mui/icons-material/Class';
 import AccountIcon from '@mui/icons-material/AccountCircle';
 
 import { UserEvent } from '../EventComponent/index.js';
@@ -37,7 +37,7 @@ export const Home = ({ authService, user }) => {
   );
 
   useEffect(() => {
-    if (adminPermission) setSections(['Dashboard', 'Event', 'Instructors']);
+    if (adminPermission) setSections(['Dashboard', 'Class', 'Instructors']);
   }, [user]);
 
   return (
@@ -69,7 +69,7 @@ export const Home = ({ authService, user }) => {
                 <ListItemButton onClick={() => setCurrentSection(index)}>
                   <ListItemIcon>
                     {index === 0 && <DashboardIcon />}
-                    {index === 1 && <EventIcon />}
+                    {index === 1 && <ClassIcon />}
                     {index === 2 && <AccountIcon />}
                   </ListItemIcon>
                   <ListItemText primary={text} />

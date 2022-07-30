@@ -52,17 +52,17 @@ export const UserEvent = ({
   return (
     <div className={classes.container}>
       <div className={global.horizontal}>
-        <BigTitle title='Your Events' />
+        <BigTitle title='Your Classes' />
         {state.matches('loaded') && (
           <div style={{ marginLeft: '32px' }}>
             {adminPermission && (
               <Button variant='contained' onClick={() => setCreate(true)}>
-                Create Event
+                Create Class
               </Button>
             )}
             {studentPermission && (
               <Button variant='contained' onClick={() => setJoin(true)}>
-                Join Event
+                Join Class
               </Button>
             )}
           </div>
