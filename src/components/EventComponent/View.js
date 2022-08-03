@@ -1,6 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@mui/styles';
-import { AppBar, Box, Button, Toolbar, Tab } from '@mui/material';
+import {
+  Alert,
+  AppBar,
+  Box,
+  Button,
+  Toolbar,
+  Tab,
+  TextField,
+  List,
+  ListItem as ListItemMUI,
+  ListItemText,
+} from '@mui/material';
+import LoadingButton from '@mui/lab/LoadingButton';
+import * as XLSX from 'xlsx';
 import { useMachine } from '@xstate/react';
 
 import { UpdateModal } from './Update.js';
@@ -22,7 +35,7 @@ import { SmallTitle, BigTitle, Text } from '../../frameworks/Typography.js';
 import { DefaultModal } from '../../frameworks/Modal.js';
 import { ListItem } from '../../frameworks/ListItem.js';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   container: {
     width: '100%',
     marginTop: '40px',
@@ -37,6 +50,17 @@ const useStyles = makeStyles(() => ({
     width: '660px',
     minHeight: '650px',
     padding: '32px 48px',
+  },
+  modal2: {
+    width: '450px',
+    minHeight: '260px',
+    padding: '32px 48px',
+  },
+  list: {
+    width: '100%',
+    maxHeight: '200px',
+    overflow: 'auto',
+    boxShadow: theme.shadows[26],
   },
 }));
 
@@ -170,6 +194,7 @@ export const Event = ({ authService, user }) => {
                 user={user}
                 event_id={event_id}
                 adminPermission={adminPermission}
+                instructorLevelPermission={instructorLevelPermission}
               />
             </TabPanel>
           </Box>
@@ -272,10 +297,17 @@ const InviteModal = ({ authService, open, setOpen, event_id }) => {
   );
 };
 
-const Members = ({ authService, user, event_id, adminPermission }) => {
+const Members = ({
+  authService,
+  user,
+  event_id,
+  adminPermission,
+  instructorLevelPermission,
+}) => {
   const global = useGlobalStyles();
 
-  const [add, setAdd] = useState(false);
+  const [addInstructor, setAddInstructor] = useState(false);
+  const [importStudents, setImportStudents] = useState(false);
 
   const [state, send] = useMachine(EventMembersMachine);
 
@@ -292,14 +324,25 @@ const Members = ({ authService, user, event_id, adminPermission }) => {
       <br />
       <div className={global.horizontal} style={{ marginBottom: '10px' }}>
         <SmallTitle title='Class Member List' weight={500} size={16} />
-        {state.matches('loaded') && adminPermission && (
-          <Button
-            variant='contained'
-            style={{ marginLeft: 'auto' }}
-            onClick={() => setAdd(true)}
-          >
-            Add Instructors
-          </Button>
+        {state.matches('loaded') && (
+          <div style={{ marginLeft: 'auto' }}>
+            {instructorLevelPermission && (
+              <Button
+                variant='contained'
+                onClick={() => setImportStudents(true)}
+              >
+                Import Students
+              </Button>
+            )}
+            {adminPermission && (
+              <Button
+                variant='contained'
+                onClick={() => setAddInstructor(true)}
+              >
+                Add Instructors
+              </Button>
+            )}
+          </div>
         )}
       </div>
       {state.matches('loaded') && (
@@ -331,16 +374,24 @@ const Members = ({ authService, user, event_id, adminPermission }) => {
         />
       )}
       {state.matches('get_event_members') && <Loading flexCenter />}
-      {add && (
+      {addInstructor && (
         <AddInstructor
           authService={authService}
-          open={add}
-          setOpen={setAdd}
+          open={addInstructor}
+          setOpen={setAddInstructor}
           user={user}
           event_id={event_id}
-          refresh={() =>
-            send({ type: 'REFRESH', params: { event_id: event_id } })
-          }
+          refresh={refresh}
+        />
+      )}
+      {importStudents && (
+        <ImportStudents
+          authService={authService}
+          open={importStudents}
+          setOpen={setImportStudents}
+          user={user}
+          event_id={event_id}
+          refresh={refresh}
         />
       )}
       <br />
@@ -398,6 +449,153 @@ const AddInstructor = ({
         <ServerError authService={authService} error={state.context.error} />
       )}
       {state.matches('get_event_members') && <Loading />}
+    </DefaultModal>
+  );
+};
+
+const ImportStudents = ({
+  authService,
+  open,
+  setOpen,
+  user,
+  event_id,
+  refresh,
+}) => {
+  const classes = useStyles();
+
+  const [data, setData] = useState([]);
+  const [fileName, setFileName] = useState('');
+  const [error, setError] = useState('');
+
+  const [state, send] = useMachine(EventMembersMachine);
+
+  const handleUpload = ({ target }) => {
+    setError('');
+    setFileName('');
+
+    if (target.files.length > 0) {
+      let fileUploadedName = target.files[0].name;
+      var acceptedFormats = new Array('.xlsx', '.xls', '.csv');
+      let uploadedFormat = fileUploadedName.substring(
+        fileUploadedName.lastIndexOf('.')
+      );
+      if (acceptedFormats.indexOf(uploadedFormat) < 0) {
+        setError(
+          'You are uploaded invalid format of document. Document with ' +
+            acceptedFormats.toString() +
+            ' only are supported.'
+        );
+      } else {
+        var document = target.files[0];
+        setFileName(document.name);
+        var reader = new FileReader();
+        reader.onload = function (event) {
+          var content = event.target.result;
+          var workBook = XLSX.read(content, { type: 'binary' });
+          var workSheet = workBook.Sheets[workBook.SheetNames[0]];
+          var csv = XLSX.utils.sheet_to_csv(workSheet, { header: 1 });
+          var emails = csv.slice(0).split('\n');
+          setData(emails);
+        };
+        reader.readAsBinaryString(document);
+      }
+    } else {
+      setError('No Files Uploaded.');
+    }
+  };
+
+  useEffect(() => {
+    if (state.matches('done')) {
+      setTimeout(() => {
+        refresh();
+        setOpen(false);
+      }, 1000);
+    }
+  }, [state]);
+
+  return (
+    <DefaultModal
+      header='Import Students'
+      open={open}
+      setOpen={setOpen}
+      className={classes.modal2}
+    >
+      <div style={{ textAlign: 'justify' }}>
+        {state.matches('done') && (
+          <Alert severity='success' style={{ marginBottom: '10px' }}>
+            Successfully Imported
+          </Alert>
+        )}
+        {state.matches('failure') && (
+          <Alert severity='error' style={{ marginBottom: '10px' }}>
+            {state.context.error}
+          </Alert>
+        )}
+        <SmallTitle
+          title='You can import students with a list of emails in a document with xlsx/xls/csv
+          format.'
+          size={14}
+          weight={400}
+        />
+        <TextField
+          style={{ marginTop: '10px', marginBottom: '5px' }}
+          value={fileName}
+          fullWidth
+          error={error !== ''}
+        />
+        {error !== '' ? (
+          <SmallTitle title={error} color='red' size={12} weight={400} />
+        ) : (
+          <>
+            <br />
+          </>
+        )}
+        <br />
+        <Button variant='contained' component='label'>
+          Upload File
+          <input
+            type='file'
+            accept='.xlsx, .xls, .csv'
+            hidden
+            onChange={(value) => handleUpload(value)}
+          />
+        </Button>
+        {data && data.length > 0 && (
+          <>
+            <br />
+            <br />
+            <SmallTitle title='Emails to Import' size={18} weight={500} />
+            <br />
+            <List className={classes.list}>
+              {data.map((value, index) => (
+                <ListItemMUI key={index}>
+                  <ListItemText primary={value} />
+                </ListItemMUI>
+              ))}
+            </List>
+            <br />
+            <LoadingButton
+              loading={state.matches('add_event_students')}
+              variant='contained'
+              style={{ width: '100px' }}
+              disabled={state.matches('done')}
+              onClick={() => {
+                send({
+                  type: 'ADD_EVENT_STUDENTS',
+                  value: {
+                    role: user.permission_type,
+                    emails: data,
+                    event: event_id,
+                  },
+                });
+              }}
+            >
+              Import
+            </LoadingButton>
+            <br />
+          </>
+        )}
+      </div>
     </DefaultModal>
   );
 };

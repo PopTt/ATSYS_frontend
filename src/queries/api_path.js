@@ -11,6 +11,7 @@ export const update_instructor = user_path + 'updateInstructor';
 export const delete_instructor = user_path + 'deleteInstructor';
 
 const event_path = backend + 'events/';
+export const add_event_students = event_path + 'addEventStudents';
 export const add_event_instructors = event_path + 'addEventInstructors';
 export const create_event = event_path + 'create';
 export const update_event = event_path + 'update';

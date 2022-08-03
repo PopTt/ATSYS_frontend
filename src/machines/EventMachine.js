@@ -1,6 +1,7 @@
 import { createMachine, assign, spawn } from 'xstate';
 import { Event } from '../models/Event.js';
 import {
+  addEventStudents,
   addEventInstructors,
   createEvent,
   updateEvent,
@@ -291,9 +292,30 @@ export const EventMembersMachine = createMachine(
     states: {
       idle: {
         on: {
+          ADD_EVENT_STUDENTS: 'add_event_students',
           ADD_EVENT_INSTRUCTORS: 'add_event_instructors',
           GET_NOT_IN_EVENT_INSTRUCTORS: 'get_not_in_event_instructors',
           GET_EVENT_MEMBERS: 'get_event_members',
+        },
+      },
+      add_event_students: {
+        invoke: {
+          src: 'AddEventStudents',
+          onDone: {
+            target: 'done',
+          },
+          onError: {
+            target: 'failure',
+            actions: assign({
+              error: (context, event) => event.data.message,
+            }),
+          },
+        },
+        after: {
+          15000: {
+            target: 'failure',
+            actions: assign({ error: 'Request Timeout' }),
+          },
         },
       },
       add_event_instructors: {
@@ -375,6 +397,9 @@ export const EventMembersMachine = createMachine(
   },
   {
     services: {
+      AddEventStudents: async (context, event) => {
+        return await addEventStudents(event.value);
+      },
       AddEventInstructors: async (context, event) => {
         return await addEventInstructors(event.value);
       },

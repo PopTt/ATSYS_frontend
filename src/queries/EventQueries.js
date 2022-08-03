@@ -1,5 +1,6 @@
 import { Get, Post, Delete } from './axios/call.js';
 import {
+  add_event_students,
   add_event_instructors,
   create_event,
   update_event,
@@ -53,6 +54,10 @@ export const joinEvent = async (data) => {
 
 export const removeEventMember = async (data) => {
   return await Delete(remove_event_member, data);
+};
+
+export const addEventStudents = async (data) => {
+  return await Post(add_event_students, data);
 };
 
 export const addEventInstructors = async (data) => {

@@ -1,8 +1,19 @@
 import { Typography } from '@mui/material';
 
-export const SmallTitle = ({ title, weight = 500, size = 20 }) => {
+export const SmallTitle = ({
+  title,
+  weight = 500,
+  size = 20,
+  color = 'black',
+}) => {
   return (
-    <Typography component='h1' variant='h6' fontWeight={weight} fontSize={size}>
+    <Typography
+      component='h1'
+      variant='h6'
+      fontWeight={weight}
+      fontSize={size}
+      style={{ color: color }}
+    >
       {title}
     </Typography>
   );

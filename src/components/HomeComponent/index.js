@@ -25,7 +25,7 @@ import { BigTitle } from '../../frameworks/Typography.js';
 const drawerWidth = 240;
 
 export const Home = ({ authService, user }) => {
-  const [sections, setSections] = useState(['Dashboard', 'Event']);
+  const [sections, setSections] = useState(['Dashboard', 'Class']);
   const [currentSection, setCurrentSection] = useState(0);
 
   const adminPermission = PermissionChecker.AdminLevelPermission(
