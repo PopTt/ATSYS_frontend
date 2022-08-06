@@ -155,7 +155,7 @@ export const Event = ({ authService, user }) => {
                       Update Class
                     </Button>
                   )}
-                  {adminInstructorPermission && (
+                  {/* {adminInstructorPermission && (
                     <Button
                       variant='outlined'
                       onClick={() => setInvite(true)}
@@ -163,7 +163,7 @@ export const Event = ({ authService, user }) => {
                     >
                       Invite Users
                     </Button>
-                  )}
+                  )} */}
                 </div>
               </ListItem>
             </div>
@@ -324,24 +324,18 @@ const Members = ({
       <br />
       <div className={global.horizontal} style={{ marginBottom: '10px' }}>
         <SmallTitle title='Class Member List' weight={500} size={16} />
-        {state.matches('loaded') && (
+        {state.matches('loaded') && adminPermission && (
           <div style={{ marginLeft: 'auto' }}>
-            {instructorLevelPermission && (
-              <Button
-                variant='contained'
-                onClick={() => setImportStudents(true)}
-              >
-                Import Students
-              </Button>
-            )}
-            {adminPermission && (
-              <Button
-                variant='contained'
-                onClick={() => setAddInstructor(true)}
-              >
-                Add Instructors
-              </Button>
-            )}
+            <Button
+              variant='contained'
+              onClick={() => setImportStudents(true)}
+              style={{ marginRight: '10px' }}
+            >
+              Add Students
+            </Button>
+            <Button variant='contained' onClick={() => setAddInstructor(true)}>
+              Add Instructors
+            </Button>
           </div>
         )}
       </div>

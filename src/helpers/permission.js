@@ -19,6 +19,15 @@ export const InstructorLevelPermission = (permission_type) => {
   return false;
 };
 
+export const InstructorStudentLevelPermission = (permission_type) => {
+  if (
+    permission_type == PermissionType.Instructor ||
+    permission_type == PermissionType.Student
+  )
+    return true;
+  return false;
+};
+
 export const StudentLevelPermission = (permission_type) => {
   if (permission_type == PermissionType.Student) return true;
   return false;

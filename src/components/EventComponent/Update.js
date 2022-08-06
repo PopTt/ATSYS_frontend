@@ -4,7 +4,7 @@ import { useMachine } from '@xstate/react';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { Alert, Select, MenuItem, InputLabel } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
-import { string, object } from 'yup';
+import { string, object, date } from 'yup';
 
 import { ServerError } from '../FailureComponent/ServerFailure.js';
 import { EventMachine } from '../../machines/EventMachine.js';
@@ -15,6 +15,8 @@ import { TextBox } from '../../frameworks/Form.js';
 const validationEventSchema = object({
   event_name: string().required('Name is required'),
   event_description: string(),
+  start_date: date().required('Start date is required'),
+  end_date: date().required('End date is required'),
 });
 
 const useStyles = makeStyles(() => ({
@@ -44,13 +46,15 @@ export const UpdateModal = ({
 }) => {
   const classes = useStyles();
 
-  const [eventType, setEventType] = useState(0);
+  const [eventType, setEventType] = useState(event.event_type);
 
   const [state, send] = useMachine(EventMachine(undefined));
 
   const initialValues = {
     event_name: event.event_name,
     event_description: event.event_description,
+    start_date: new Date(event.start_date),
+    end_date: new Date(event.end_date),
   };
 
   useEffect(() => {
@@ -62,6 +66,7 @@ export const UpdateModal = ({
     }
   }, [state]);
 
+  console.log(initialValues);
   return (
     <DefaultModal
       header='Update Class'
@@ -120,7 +125,37 @@ export const UpdateModal = ({
                 />
               )}
             </Field>
-            <div style={{ marginTop: '30px' }}></div>
+            <div style={{ marginTop: '15px' }}></div>
+            <InputLabel>Start Date</InputLabel>
+            <Field name='start_date'>
+              {({ field, meta: { touched, error, value, initialValue } }) => (
+                <TextBox
+                  type='date'
+                  variant='outlined'
+                  field={field}
+                  touched={touched}
+                  value={value}
+                  initialValue={initialValue}
+                  error={error}
+                />
+              )}
+            </Field>
+            <div style={{ marginTop: '15px' }}></div>
+            <InputLabel>End Date</InputLabel>
+            <Field name='end_date'>
+              {({ field, meta: { touched, error, value, initialValue } }) => (
+                <TextBox
+                  type='date'
+                  variant='outlined'
+                  field={field}
+                  touched={touched}
+                  value={value}
+                  initialValue={initialValue}
+                  error={error}
+                />
+              )}
+            </Field>
+            <div style={{ marginTop: '15px' }}></div>
             <InputLabel>Type</InputLabel>
             <Select
               value={eventType}
@@ -132,7 +167,7 @@ export const UpdateModal = ({
               <MenuItem value={1}>{EventType[1]}</MenuItem>
               <MenuItem value={2}>{EventType[2]}</MenuItem>
             </Select>
-            <div style={{ marginTop: '48px', marginBottom: '32px' }}>
+            <div style={{ marginTop: '48px' }}>
               <LoadingButton
                 type='submit'
                 loading={state.matches('updating')}

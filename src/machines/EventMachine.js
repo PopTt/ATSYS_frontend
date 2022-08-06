@@ -22,7 +22,8 @@ export const defineEvent = (event) => {
     event.event_description,
     event.event_type,
     event.established_time,
-    event.invitation_code,
+    event.start_date,
+    event.end_date,
     event.admin_id
   );
 };

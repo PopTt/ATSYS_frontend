@@ -236,6 +236,7 @@ export const InstructorGrid = ({
   useEffect(() => {
     setLoading(true);
     let temp = [];
+    console.log(users);
     users.map((user) => {
       temp.push({
         id: user.user_id,

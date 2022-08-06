@@ -1,18 +1,17 @@
 import React, { useEffect, useState } from 'react';
+import { DataGrid, GridToolbar } from '@mui/x-data-grid';
 import { makeStyles } from '@mui/styles';
 import { useMachine } from '@xstate/react';
-import { Button } from '@mui/material';
+import { Button, LinearProgress } from '@mui/material';
 
 import { CreateModal } from './Create.js';
 import { JoinModal } from './Join.js';
 import { Loading } from '../LoadingComponent/CircularLoading.js';
 import { EmptyError, ServerError } from '../FailureComponent/ServerFailure.js';
-import { EventsMachine } from '../../machines/EventMachine.js';
+import { defineEvent, EventsMachine } from '../../machines/EventMachine.js';
 import { event as event_path } from '../../routes/route_paths.js';
-import { EventType } from '../../models/Event.js';
 import { useGlobalStyles } from '../../helpers/styles.js';
-import { ListItem } from '../../frameworks/ListItem.js';
-import { SmallTitle, BigTitle, Text } from '../../frameworks/Typography.js';
+import { SmallTitle, BigTitle } from '../../frameworks/Typography.js';
 
 const useStyles = makeStyles(() => ({
   container: {
@@ -60,49 +59,22 @@ export const UserEvent = ({
                 Create Class
               </Button>
             )}
-            {studentPermission && (
+            {/* {studentPermission && (
               <Button variant='contained' onClick={() => setJoin(true)}>
                 Join Class
               </Button>
-            )}
+            )} */}
           </div>
         )}
       </div>
       {state.matches('loaded') && (
-        <div style={{ marginTop: '32px' }}>
+        <div style={{ marginTop: '10px' }}>
           {state.context.events.length > 0 ? (
-            <div>
-              {state.context.events.map((event) => (
-                <ListItem className={classes.item} key={event.event_id}>
-                  <SmallTitle title={event.event_name} weight={600} />
-                  <SmallTitle
-                    title={'Type: ' + EventType[event.event_type]}
-                    weight={500}
-                    size={16}
-                  />
-                  <div style={{ marginTop: '4px' }}></div>
-                  <div style={{ height: '120px' }}>
-                    <Text
-                      text={
-                        event.event_description == ''
-                          ? 'No description provided.'
-                          : event.event_description
-                      }
-                      readmore
-                    />
-                  </div>
-                  <Button
-                    variant='outlined'
-                    style={{ float: 'right' }}
-                    onClick={() =>
-                      (window.location.href = event_path + '/' + event.event_id)
-                    }
-                  >
-                    Open
-                  </Button>
-                </ListItem>
-              ))}
-            </div>
+            <ClassGrid
+              user={user}
+              events={state.context.events}
+              adminPermission={adminPermission}
+            />
           ) : (
             <EmptyError />
           )}
@@ -140,5 +112,103 @@ export const UserEvent = ({
         />
       )}
     </div>
+  );
+};
+
+const ClassGrid = ({ user, events, adminPermission }) => {
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const columns = [
+    {
+      field: 'id',
+      headerName: 'Id',
+      width: 70,
+      hide: true,
+      disableExport: true,
+      hideable: false,
+      filterable: false,
+    },
+    { field: 'event_name', headerName: 'Class name', width: 320 },
+    {
+      field: 'type',
+      headerName: 'Class Type',
+      width: 160,
+      headerAlign: 'center',
+      align: 'center',
+    },
+    {
+      field: 'status',
+      headerName: 'Status',
+      width: 160,
+      headerAlign: 'center',
+      align: 'center',
+    },
+    {
+      field: 'actions',
+      headerName: 'Actions',
+      width: 150,
+      renderCell: ViewClass,
+    },
+  ];
+
+  useEffect(() => {
+    setLoading(true);
+    let temp = [];
+    events.map((event, index) => {
+      let temp_ev = defineEvent(event);
+      temp.push({
+        id: event.event_id,
+        event_name: temp_ev.getEventName(),
+        type: temp_ev.getEventType(),
+        status: temp_ev.getStatus() ? 'Active' : 'Inactive',
+        actions: event.event_id,
+      });
+    });
+    setRows(temp);
+    setLoading(false);
+  }, [events]);
+
+  return (
+    <div style={{ height: 500, width: '800px' }}>
+      <br />
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        initialState={{
+          sorting: {
+            sortModel: [{ field: 'status', sort: 'asc' }],
+          },
+        }}
+        pageSize={12}
+        rowsPerPageOptions={[12]}
+        loading={loading}
+        components={{
+          LoadingOverlay: LinearProgress,
+          Toolbar: GridToolbar,
+        }}
+      />
+    </div>
+  );
+};
+
+const ViewClass = (props) => {
+  const { hasFocus, value } = props;
+
+  return (
+    <Button
+      component='button'
+      variant='contained'
+      size='small'
+      tabIndex={hasFocus ? 0 : -1}
+      onKeyDown={(event) => {
+        if (event.key === ' ') {
+          event.stopPropagation();
+        }
+      }}
+      onClick={() => (window.location.href = event_path + '/' + value)}
+    >
+      Open
+    </Button>
   );
 };

@@ -4,7 +4,7 @@ import { useMachine } from '@xstate/react';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { Alert, Select, MenuItem, InputLabel } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
-import { string, object } from 'yup';
+import { string, object, date } from 'yup';
 
 import { ServerError } from '../FailureComponent/ServerFailure.js';
 import { EventMachine } from '../../machines/EventMachine.js';
@@ -15,11 +15,15 @@ import { TextBox } from '../../frameworks/Form.js';
 const initialValues = {
   event_name: '',
   event_description: '',
+  start_date: '',
+  end_date: '',
 };
 
 const validationEventSchema = object({
   event_name: string().required('Name is required'),
   event_description: string(),
+  start_date: date().required('Start time is required'),
+  end_date: date().required('End time is required'),
 });
 
 const useStyles = makeStyles(() => ({
@@ -113,7 +117,37 @@ export const CreateModal = ({ authService, open, setOpen, user, refresh }) => {
                 />
               )}
             </Field>
-            <div style={{ marginTop: '30px' }}></div>
+            <div style={{ marginTop: '15px' }}></div>
+            <InputLabel>Start Date</InputLabel>
+            <Field name='start_date'>
+              {({ field, meta: { touched, error, value, initialValue } }) => (
+                <TextBox
+                  type='date'
+                  variant='outlined'
+                  field={field}
+                  touched={touched}
+                  value={value}
+                  initialValue={initialValue}
+                  error={error}
+                />
+              )}
+            </Field>
+            <div style={{ marginTop: '15px' }}></div>
+            <InputLabel>End Date</InputLabel>
+            <Field name='end_date'>
+              {({ field, meta: { touched, error, value, initialValue } }) => (
+                <TextBox
+                  type='date'
+                  variant='outlined'
+                  field={field}
+                  touched={touched}
+                  value={value}
+                  initialValue={initialValue}
+                  error={error}
+                />
+              )}
+            </Field>
+            <div style={{ marginTop: '15px' }}></div>
             <InputLabel>Type</InputLabel>
             <Select
               value={eventType}

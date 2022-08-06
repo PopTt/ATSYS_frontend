@@ -12,7 +12,8 @@ export class Event {
     event_description,
     event_type,
     established_time,
-    invitation_code,
+    start_date,
+    end_date,
     admin_id
   ) {
     this.event_id = event_id;
@@ -20,7 +21,8 @@ export class Event {
     this.event_description = event_description;
     this.event_type = event_type;
     this.established_time = established_time;
-    this.invitation_code = invitation_code;
+    this.start_date = start_date;
+    this.end_date = end_date;
     this.admin_id = admin_id;
   }
 
@@ -42,5 +44,19 @@ export class Event {
 
   getCreatedDate() {
     return this.established_time;
+  }
+
+  getStartDate() {
+    return this.start_date;
+  }
+
+  getCreatedDate() {
+    return this.end_date;
+  }
+
+  getStatus() {
+    let today = new Date();
+    if (this.start_date === null && this.end_date === null) return false;
+    return today > new Date(this.start_date) && new Date(today < this.end_date);
   }
 }
