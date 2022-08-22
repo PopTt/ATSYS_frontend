@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@mui/styles';
 import { useMachine } from '@xstate/react';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Alert, Select, MenuItem, InputLabel } from '@mui/material';
+import { Alert, Select, MenuItem, InputLabel, TextField } from '@mui/material';
+import { LocalizationProvider, DesktopDatePicker } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { Formik, Form, Field } from 'formik';
 import { string, object, date } from 'yup';
 
@@ -77,7 +79,7 @@ export const CreateModal = ({ authService, open, setOpen, user, refresh }) => {
           send({ type: 'CREATE', value: values });
         }}
       >
-        {() => (
+        {({ setFieldValue }) => (
           <Form className={classes.form}>
             {state.matches('failure') && (
               <>
@@ -121,30 +123,52 @@ export const CreateModal = ({ authService, open, setOpen, user, refresh }) => {
             <InputLabel>Start Date</InputLabel>
             <Field name='start_date'>
               {({ field, meta: { touched, error, value, initialValue } }) => (
-                <TextBox
-                  type='date'
-                  variant='outlined'
-                  field={field}
-                  touched={touched}
-                  value={value}
-                  initialValue={initialValue}
-                  error={error}
-                />
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DesktopDatePicker
+                    type='date'
+                    variant='outlined'
+                    value={value}
+                    onChange={(newValue) => {
+                      setFieldValue('start_date', newValue);
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        fullWidth
+                        error={error}
+                        helperText={
+                          touched || value !== initialValue ? error : ''
+                        }
+                      />
+                    )}
+                  />
+                </LocalizationProvider>
               )}
             </Field>
             <div style={{ marginTop: '15px' }}></div>
             <InputLabel>End Date</InputLabel>
             <Field name='end_date'>
               {({ field, meta: { touched, error, value, initialValue } }) => (
-                <TextBox
-                  type='date'
-                  variant='outlined'
-                  field={field}
-                  touched={touched}
-                  value={value}
-                  initialValue={initialValue}
-                  error={error}
-                />
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DesktopDatePicker
+                    type='date'
+                    variant='outlined'
+                    value={value}
+                    onChange={(newValue) => {
+                      setFieldValue('end_date', newValue);
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        fullWidth
+                        error={error}
+                        helperText={
+                          touched || value !== initialValue ? error : ''
+                        }
+                      />
+                    )}
+                  />
+                </LocalizationProvider>
               )}
             </Field>
             <div style={{ marginTop: '15px' }}></div>

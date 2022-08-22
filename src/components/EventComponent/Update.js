@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@mui/styles';
 import { useMachine } from '@xstate/react';
 import LoadingButton from '@mui/lab/LoadingButton';
-import { Alert, Select, MenuItem, InputLabel } from '@mui/material';
+import { Alert, Select, MenuItem, InputLabel, TextField } from '@mui/material';
+import { LocalizationProvider, DesktopDatePicker } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { Formik, Form, Field } from 'formik';
 import { string, object, date } from 'yup';
 
@@ -53,8 +55,8 @@ export const UpdateModal = ({
   const initialValues = {
     event_name: event.event_name,
     event_description: event.event_description,
-    start_date: new Date(event.start_date),
-    end_date: new Date(event.end_date),
+    start_date: new Date(event.start_date).toDateString().split('T')[0],
+    end_date: new Date(event.end_date).toDateString().split('T')[0],
   };
 
   useEffect(() => {
@@ -66,7 +68,6 @@ export const UpdateModal = ({
     }
   }, [state]);
 
-  console.log(initialValues);
   return (
     <DefaultModal
       header='Update Class'
@@ -85,7 +86,7 @@ export const UpdateModal = ({
           send({ type: 'UPDATE', value: values });
         }}
       >
-        {() => (
+        {({ setFieldValue }) => (
           <Form className={classes.form}>
             {state.matches('failure') && (
               <>
@@ -129,30 +130,52 @@ export const UpdateModal = ({
             <InputLabel>Start Date</InputLabel>
             <Field name='start_date'>
               {({ field, meta: { touched, error, value, initialValue } }) => (
-                <TextBox
-                  type='date'
-                  variant='outlined'
-                  field={field}
-                  touched={touched}
-                  value={value}
-                  initialValue={initialValue}
-                  error={error}
-                />
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DesktopDatePicker
+                    type='date'
+                    variant='outlined'
+                    value={value}
+                    onChange={(newValue) => {
+                      setFieldValue('start_date', newValue);
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        fullWidth
+                        error={error}
+                        helperText={
+                          touched || value !== initialValue ? error : ''
+                        }
+                      />
+                    )}
+                  />
+                </LocalizationProvider>
               )}
             </Field>
             <div style={{ marginTop: '15px' }}></div>
             <InputLabel>End Date</InputLabel>
             <Field name='end_date'>
               {({ field, meta: { touched, error, value, initialValue } }) => (
-                <TextBox
-                  type='date'
-                  variant='outlined'
-                  field={field}
-                  touched={touched}
-                  value={value}
-                  initialValue={initialValue}
-                  error={error}
-                />
+                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                  <DesktopDatePicker
+                    type='date'
+                    variant='outlined'
+                    value={value}
+                    onChange={(newValue) => {
+                      setFieldValue('end_date', newValue);
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        fullWidth
+                        error={error}
+                        helperText={
+                          touched || value !== initialValue ? error : ''
+                        }
+                      />
+                    )}
+                  />
+                </LocalizationProvider>
               )}
             </Field>
             <div style={{ marginTop: '15px' }}></div>

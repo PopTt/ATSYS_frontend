@@ -26,7 +26,7 @@ export const Post = async (url, data) => {
     .catch((err) => {
       if (err.response.status === 401)
         localStorage.removeItem(process.env.REACT_APP_ACCESS_TOKEN);
-      throw new Error(err.response.data.message);
+      throw new Error(err.response.data?.message ?? 'Unknown Error Occur');
     });
 };
 
@@ -39,7 +39,7 @@ export const Delete = async (url, data) => {
     .catch((err) => {
       if (err.response.status === 401)
         localStorage.removeItem(process.env.REACT_APP_ACCESS_TOKEN);
-      throw new Error(err.response.data.message);
+      throw new Error(err.response.data?.message ?? 'Unknown Error Occur');
     });
 };
 
@@ -52,6 +52,6 @@ export const Get = async (url) => {
     .catch((err) => {
       if (err.response.status === 401)
         localStorage.removeItem(process.env.REACT_APP_ACCESS_TOKEN);
-      throw new Error(err.response.data.message);
+      throw new Error(err.response.data?.message ?? 'Unknown Error Occur');
     });
 };

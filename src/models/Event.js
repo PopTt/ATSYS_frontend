@@ -47,16 +47,18 @@ export class Event {
   }
 
   getStartDate() {
-    return this.start_date;
+    if (this.start_date === null) return 'N/A';
+    return new Date(this.start_date).toLocaleDateString().split('T')[0];
   }
 
-  getCreatedDate() {
-    return this.end_date;
+  getEndDate() {
+    if (this.end_date === null) return 'N/A';
+    return new Date(this.end_date).toLocaleDateString().split('T')[0];
   }
 
   getStatus() {
     let today = new Date();
-    if (this.start_date === null && this.end_date === null) return false;
-    return today > new Date(this.start_date) && new Date(today < this.end_date);
+    if (this.start_date === null || this.end_date === null) return false;
+    return today > new Date(this.start_date) && today < new Date(this.end_date);
   }
 }

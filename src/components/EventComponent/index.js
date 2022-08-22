@@ -138,6 +138,20 @@ const ClassGrid = ({ user, events, adminPermission }) => {
       align: 'center',
     },
     {
+      field: 'start_date',
+      headerName: 'Start Date',
+      width: 160,
+      headerAlign: 'center',
+      align: 'center',
+    },
+    {
+      field: 'end_date',
+      headerName: 'End Date',
+      width: 160,
+      headerAlign: 'center',
+      align: 'center',
+    },
+    {
       field: 'status',
       headerName: 'Status',
       width: 160,
@@ -161,6 +175,8 @@ const ClassGrid = ({ user, events, adminPermission }) => {
         id: event.event_id,
         event_name: temp_ev.getEventName(),
         type: temp_ev.getEventType(),
+        start_date: temp_ev.getStartDate(),
+        end_date: temp_ev.getEndDate(),
         status: temp_ev.getStatus() ? 'Active' : 'Inactive',
         actions: event.event_id,
       });
@@ -170,7 +186,7 @@ const ClassGrid = ({ user, events, adminPermission }) => {
   }, [events]);
 
   return (
-    <div style={{ height: 500, width: '800px' }}>
+    <div style={{ height: 700, width: '1150px' }}>
       <br />
       <DataGrid
         rows={rows}
@@ -188,6 +204,7 @@ const ClassGrid = ({ user, events, adminPermission }) => {
           Toolbar: GridToolbar,
         }}
       />
+      <br />
     </div>
   );
 };
