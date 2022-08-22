@@ -28,6 +28,13 @@ export const AttendanceRecords = ({
     });
   }, [attendance_id]);
 
+  const refresh = () => {
+    send({
+      type: 'REFRESH_USERS_ATTENDANCE',
+      params: { attendance_id: attendance_id },
+    });
+  };
+
   return (
     <div
       style={{
@@ -43,6 +50,7 @@ export const AttendanceRecords = ({
               user={user}
               userAttendances={state.context.userAttendances}
               instructorLevelPermission={instructorLevelPermission}
+              refresh={refresh}
             />
           ) : (
             <div style={{ marginTop: '20px' }}>
@@ -73,10 +81,11 @@ const AttendanceRecordsGrid = ({
   user,
   userAttendances,
   instructorLevelPermission,
+  refresh,
 }) => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [_, send] = useMachine(UserAttendanceMachine);
+  const [state, send] = useMachine(UserAttendanceMachine);
 
   const columns = [
     {
@@ -155,6 +164,12 @@ const AttendanceRecordsGrid = ({
     setRows(temp);
     setLoading(false);
   }, [userAttendances]);
+
+  useEffect(() => {
+    if (state.matches('done')) {
+      refresh();
+    }
+  }, [state]);
 
   return (
     <div style={{ height: 400, width: '800px' }}>
